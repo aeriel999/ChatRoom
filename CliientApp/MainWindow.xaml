@@ -1,0 +1,22 @@
+﻿<Window x:Class="CliientApp.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:CliientApp"
+        mc:Ignorable="d"
+        Title="MainWindow" Height="450" Width="800">
+    <DockPanel>
+        <DockPanel DockPanel.Dock="Top">
+            <Label>Messege: </Label>
+        
+            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right">Leave</Button>
+            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="SendBtnClick">Send</Button>
+            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="JoinBtnClick"> Join</Button>
+
+            <TextBox Margin="5" VerticalContentAlignment="Center" Name="msgTB"></TextBox>
+        </DockPanel>
+        <TextBlock DockPanel.Dock="Top" TextAlignment="Center">Chat</TextBlock>
+        <ListBox ItemsSource="{Binding}"></ListBox>
+    </DockPanel>
+</Window>
