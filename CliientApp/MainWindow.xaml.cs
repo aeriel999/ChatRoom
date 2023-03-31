@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Linq;
@@ -12,6 +11,7 @@ using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Input;
+using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
@@ -63,8 +63,8 @@ namespace CliientApp
         }
 
         private async void Listen()
-        { 
-           while (true) 
+        {
+            while (true)
             {
                 IPEndPoint? remoteIp = null;
                 var result = await client.ReceiveAsync();
@@ -74,22 +74,13 @@ namespace CliientApp
                 messeges.Add(new MessegeInfo(msg));
             }
         }
-    }
 
-   public class MessegeInfo
-    {
-        public string Messege { get; set; }
-        public DateTime Time { get; set; }
-
-        public MessegeInfo(string text)
+        private void LeaveBtnClick(object sender, RoutedEventArgs e)
         {
-            Messege = text;
-            Time = DateTime.Now;
+            SendMsg("$<leave>");
+
+            client.Close();
         }
 
-        public override string ToString() 
-        {
-            return $"{Messege} : {Time.ToShortTimeString()}";
-        }
     }
 }

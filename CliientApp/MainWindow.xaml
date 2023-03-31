@@ -7,12 +7,15 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="450" Width="800">
     <DockPanel>
+        <Grid DockPanel.Dock="Top">
+            
+        </Grid>
         <DockPanel DockPanel.Dock="Top">
-            <Label>Messege: </Label>
-        
-            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right">Leave</Button>
+            <Label>Messege:</Label>
+
+            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="LeaveBtnClick">Leave</Button>
             <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="SendBtnClick">Send</Button>
-            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="JoinBtnClick"> Join</Button>
+            <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="JoinBtnClick">Join</Button>
 
             <TextBox Margin="5" VerticalContentAlignment="Center" Name="msgTB"></TextBox>
         </DockPanel>
