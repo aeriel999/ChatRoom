@@ -30,8 +30,8 @@ namespace CliientApp
         private NetworkStream _ns;
         private StreamReader reader = null;
         private StreamWriter writer = null;
-
         private ObservableCollection<MessegeInfo> messeges = new ObservableCollection<MessegeInfo>();
+
         public MainWindow()
         {
             InitializeComponent();
@@ -48,7 +48,7 @@ namespace CliientApp
             _ns = null;
         }
 
-        private async void SendBtnClick(object sender, RoutedEventArgs e)
+        private void SendBtnClick(object sender, RoutedEventArgs e)
         {
             writer.WriteLine(msgTB.Text);
 
@@ -73,22 +73,14 @@ namespace CliientApp
                 MessageBox.Show(ex.Message);
             }
         }
-
-        private void SendMsg(string msg)
-        {
-        }
-
         private async void Listen()
         {
-
             while (true)
             {
                 string? msg =  await reader.ReadLineAsync();
                 
                 messeges.Add(new MessegeInfo(msg));
             }
-
-            
         }
 
         private void DisconnectBtnClick(object sender, RoutedEventArgs e)
