@@ -2,47 +2,53 @@
 using System.Net.Sockets;
 using System.Text;
 
-const string serverAdress = "127.0.0.1";
-const short serverPort = 4040;
-const string JOIN_CMD = "$<join>";
+ChatServer server = new ChatServer();
+
+server.Start();
 
 
 
-HashSet<IPEndPoint> members = new HashSet<IPEndPoint>();
-
-UdpClient server = new UdpClient(serverPort);
-
-IPEndPoint clientEndPoint = null;
-
-while (true)
+class ChatServer
 {
-    byte[] data = server.Receive(ref clientEndPoint);
+    const string ADDRESS = "127.0.0.1";
+    const short PORT = 4040;
 
-    string msg = Encoding.UTF8.GetString(data);
+    TcpListener listener = null;
 
-    Console.WriteLine($"Got : {msg} at {DateTime.Now.ToShortTimeString()} from {clientEndPoint}");
+    IPEndPoint clientEndPoint = null;
 
-    switch (msg)
+    public ChatServer()
     {
-        case JOIN_CMD:
-            AddMember(clientEndPoint);
-            break;
-        default:
-            SendToAll(data);
-            break;
+        listener = new TcpListener(IPAddress.Parse(ADDRESS), PORT);
+    }
+
+    public void Start()
+    {
+        listener.Start();
+
+        Console.WriteLine("Waiting for connection .......");
+
+        TcpClient client = listener.AcceptTcpClient();
+
+        Console.WriteLine("Connected!");
+
+        NetworkStream ns = client.GetStream();
+
+        StreamReader reader = new StreamReader(ns);
+
+        StreamWriter writer = new StreamWriter(ns); 
+
+        while (true)
+        {
+            string msg = reader.ReadLine();
+
+            Console.WriteLine($"Got : {msg} at {DateTime.Now.ToShortTimeString()} from {client.Client.LocalEndPoint}");
+
+            writer.WriteLine("Thanks!");
+            writer.Flush();
+        }
     }
 }
 
-void AddMember(IPEndPoint member)
-{
-    members.Add(member);
 
-}
 
-void SendToAll(byte[] data)
-{
-    foreach (var m in members)
-    {
-        server.SendAsync(data, data.Length, m);
-    }
-}
