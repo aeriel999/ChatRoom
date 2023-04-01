@@ -39,14 +39,12 @@
 
         <PasswordBox Grid.ColumnSpan="2" Grid.Row="1" Margin="10" 
               x:Name="PasswordBox"
-              materialDesign:HintAssist.Hint="Password"
-              materialDesign:TextFieldAssist.HasClearButton="True"
-              materialDesign:HintAssist.HelperText="At least 8 characters" />
+              materialDesign:HintAssist.Hint="Password"/>
 
-        <CheckBox Grid.Column="0" Grid.Row="2"
-    Style="{StaticResource MaterialDesignFilterChipPrimaryOutlineCheckBox}"
-    IsChecked="True">
-            Registre
+        <CheckBox Grid.Column="0" Grid.Row="2" x:Name="isRegistre"
+                    Style="{StaticResource MaterialDesignFilterChipPrimaryOutlineCheckBox}"
+                    IsChecked="False">
+                            Registre
         </CheckBox>
         <Grid Grid.Column="1" Grid.Row="2"
   Width="124">

@@ -30,19 +30,48 @@ namespace CliientApp
 
         private void GoBtnClick(object sender, RoutedEventArgs e)
         {
+            if (isRegistre.IsChecked == true)
+                Registre();
 
-            if (roomDB.Clients.Where(c => c.Login == NameTextBox.Text).Where(c => c.Password == PasswordBox.Password).Select(a => a.Login).FirstOrDefault() != null)
+            if (roomDB.Clients.Where(c => c.Login == NameTextBox.Text)
+                .Where(c => c.Password == PasswordBox.Password).Select(a => a.Login).FirstOrDefault() != null)
             {
                 IsLogin = true;
 
-                MessageBox.Show("Ok");
+                this.Close();
             }
             else
             {
-                MessageBox.Show("False");
-
+                MessageBox.Show("Login Or Password not correct");
             }
-            this.Close();
+        }
+
+        private void Registre()
+        {
+            if (NameTextBox.Text.Length < 4 || PasswordBox.Password.Length < 4)
+            {
+                NameTextBox.Text = string.Empty;
+                PasswordBox.Password = string.Empty;
+
+                MessageBox.Show("Login or password must be at least 3 symbols");
+            }
+            else 
+            {
+                try
+                {
+                    roomDB.Clients.Add(new Client() { Login = NameTextBox.Text, Password = PasswordBox.Password });
+                    roomDB.SaveChanges();
+                    IsLogin = true;
+
+                    MessageBox.Show("Succsses!");
+
+                    this.Close();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            }
         }
     }
 }
