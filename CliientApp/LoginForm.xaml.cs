@@ -21,6 +21,7 @@ namespace CliientApp
     {
         private ChatRoomDB roomDB = new ChatRoomDB();
         public bool IsLogin { get; set; }
+        public string? Login { get; set; }
         public LoginForm()
         {
             InitializeComponent();
@@ -32,17 +33,21 @@ namespace CliientApp
         {
             if (isRegistre.IsChecked == true)
                 Registre();
-
-            if (roomDB.Clients.Where(c => c.Login == NameTextBox.Text)
-                .Where(c => c.Password == PasswordBox.Password).Select(a => a.Login).FirstOrDefault() != null)
+            else 
             {
-                IsLogin = true;
+                Login = roomDB.Clients.Where(c => c.Login == NameTextBox.Text)
+               .Where(c => c.Password == PasswordBox.Password).Select(a => a.Login).FirstOrDefault();
 
-                this.Close();
-            }
-            else
-            {
-                MessageBox.Show("Login Or Password not correct");
+                if (Login != null)
+                {
+                    IsLogin = true;
+
+                    this.Close();
+                }
+                else
+                {
+                    MessageBox.Show("Login Or Password not correct");
+                }
             }
         }
 
@@ -57,19 +62,28 @@ namespace CliientApp
             }
             else 
             {
-                try
+                if (roomDB.Clients.Where(c => c.Login == NameTextBox.Text).Select(c => c.Login).FirstOrDefault() != null) 
                 {
-                    roomDB.Clients.Add(new Client() { Login = NameTextBox.Text, Password = PasswordBox.Password });
-                    roomDB.SaveChanges();
-                    IsLogin = true;
-
-                    MessageBox.Show("Succsses!");
-
-                    this.Close();
+                    NameTextBox.Text = string.Empty;
+                    MessageBox.Show("Such login is exist!");
                 }
-                catch (Exception ex)
+                else
                 {
-                    MessageBox.Show(ex.Message);
+                    try
+                    {
+                        roomDB.Clients.Add(new Client() { Login = NameTextBox.Text, Password = PasswordBox.Password });
+                        roomDB.SaveChanges();
+                        Login = NameTextBox.Text;
+                        IsLogin = true;
+
+                        MessageBox.Show("Succsses!");
+
+                        this.Close();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(ex.Message);
+                    }
                 }
             }
         }

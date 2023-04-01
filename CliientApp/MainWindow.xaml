@@ -27,13 +27,13 @@
             
         </Grid>
         <DockPanel DockPanel.Dock="Top">
-            <Label>Messege:</Label>
+            <Label VerticalAlignment="Bottom" FontWeight="Bold" FontSize="16">Messege:</Label>
 
             <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="SendBtnClick" Name="SendBtn">Send</Button>
 
             <TextBox Margin="5" VerticalContentAlignment="Center" Name="msgTB"></TextBox>
         </DockPanel>
-        <TextBlock DockPanel.Dock="Top" TextAlignment="Center">Chat</TextBlock>
-        <ListBox ItemsSource="{Binding}"></ListBox>
+        <TextBlock DockPanel.Dock="Top" TextAlignment="Center" FontWeight="Bold" FontSize="20" Foreground="White">Chat</TextBlock>
+        <ListBox ItemsSource="{Binding}" Background="#fff1ff" Foreground="Black"></ListBox>
     </DockPanel>
 </Window>

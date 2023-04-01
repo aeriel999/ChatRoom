@@ -24,22 +24,22 @@ namespace CliientApp
     /// </summary>
     public partial class MainWindow : Window
     {
-        IPEndPoint serverEndPoint;
-        UdpClient client;
-
-        ObservableCollection<MessegeInfo> messeges = new ObservableCollection<MessegeInfo>();
+        private IPEndPoint _serverEndPoint;
+        private UdpClient _client;
+        private ObservableCollection<MessegeInfo> _messeges = new ObservableCollection<MessegeInfo>();
+        private string _login;
         public MainWindow()
         {
             InitializeComponent();
 
-            this.DataContext = messeges;
+            this.DataContext = _messeges;
 
-            client = new UdpClient();
+            _client = new UdpClient();
 
             string serverAdress = ConfigurationManager.AppSettings["ServerAddress"]!;
             short serverPort = short.Parse(ConfigurationManager.AppSettings["ServerPort"])!;
 
-            serverEndPoint = new IPEndPoint(IPAddress.Parse(serverAdress), serverPort);
+            _serverEndPoint = new IPEndPoint(IPAddress.Parse(serverAdress), serverPort);
 
             LeaveBtn.IsEnabled = false;
 
@@ -50,7 +50,7 @@ namespace CliientApp
 
         private async void SendBtnClick(object sender, RoutedEventArgs e)
         {
-            string msg = msgTB.Text;
+            string msg = _login + " : " + msgTB.Text;
             SendMsg(msg);
         }
 
@@ -59,13 +59,17 @@ namespace CliientApp
             string msg = "$<join>";
             SendMsg(msg);
             Listen();
+
+            LeaveBtn.IsEnabled = true;
+            JoinBtn.IsEnabled = false;
+            SendBtn.IsEnabled = true;
         }
 
         private async void SendMsg(string msg)
         {
             byte[] data = Encoding.UTF8.GetBytes(msg);
 
-            await client.SendAsync(data, data.Length, serverEndPoint);
+            await _client.SendAsync(data, data.Length, _serverEndPoint);
         }
 
         private async void Listen()
@@ -73,11 +77,11 @@ namespace CliientApp
             while (true)
             {
                 IPEndPoint? remoteIp = null;
-                var result = await client.ReceiveAsync();
+                var result = await _client.ReceiveAsync();
 
                 string msg = Encoding.UTF8.GetString(result.Buffer);
 
-                messeges.Add(new MessegeInfo(msg));
+                _messeges.Add(new MessegeInfo(msg));
             }
         }
 
@@ -85,7 +89,9 @@ namespace CliientApp
         {
             SendMsg("$<leave>");
 
-            client.Close();
+            _client.Close();
+
+            JoinBtn.IsEnabled = true;
         }
 
         private void LoginBtnClick(object sender, RoutedEventArgs e)
@@ -93,6 +99,13 @@ namespace CliientApp
             LoginForm loginForm = new LoginForm();
 
             loginForm.ShowDialog();
+
+            if (loginForm.IsLogin == true)
+            {
+                JoinBtn.IsEnabled = true;
+
+                _login = loginForm.Login!;
+            }
         }
     }
 }
