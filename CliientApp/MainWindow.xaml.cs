@@ -40,6 +40,12 @@ namespace CliientApp
             short serverPort = short.Parse(ConfigurationManager.AppSettings["ServerPort"])!;
 
             serverEndPoint = new IPEndPoint(IPAddress.Parse(serverAdress), serverPort);
+
+            LeaveBtn.IsEnabled = false;
+
+            JoinBtn.IsEnabled = false;
+
+            SendBtn.IsEnabled = false;
         }
 
         private async void SendBtnClick(object sender, RoutedEventArgs e)
@@ -82,5 +88,11 @@ namespace CliientApp
             client.Close();
         }
 
+        private void LoginBtnClick(object sender, RoutedEventArgs e)
+        {
+            LoginForm loginForm = new LoginForm();
+
+            loginForm.ShowDialog();
+        }
     }
 }
