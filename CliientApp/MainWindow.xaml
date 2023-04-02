@@ -23,7 +23,7 @@
             </Grid.ColumnDefinitions>
             <Button Padding="10,5" Margin="5" Grid.Column="2" Click="LeaveBtnClick" Name="LeaveBtn">Leave</Button>
             <Button Padding="10,5" Margin="5" Grid.Column="1" Click="JoinBtnClick"  Name="JoinBtn">Join</Button>
-            <Button Padding="10,5" Margin="5" Grid.Column="0" Click="LoginBtnClick">Login</Button>
+            <Button Padding="10,5" Margin="5" Grid.Column="0" Click="LoginBtnClick" Name="LoginBtn">Login</Button>
             
         </Grid>
         <DockPanel DockPanel.Dock="Top">

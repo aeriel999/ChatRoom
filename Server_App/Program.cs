@@ -2,6 +2,7 @@
 using System.Net.Sockets;
 using System.Text;
 
+
 ChatServer server = new ChatServer();
 
 server.Start();
@@ -15,6 +16,8 @@ public class ChatServer
     private HashSet<IPEndPoint> members = new HashSet<IPEndPoint>();
     private UdpClient server = new UdpClient(PORT);
     private IPEndPoint clientEndPoint = null;
+    private const int MAX_OF_MEMBERS = 3;
+    private bool _isMaxCount = false;
 
     public void Start()
     {
@@ -29,7 +32,13 @@ public class ChatServer
             switch (msg)
             {
                 case JOIN_CMD:
-                    AddMember(clientEndPoint);
+                    if (!_isMaxCount)
+                        AddMember(clientEndPoint);
+                    else
+                    {
+                        byte[] refusal = Encoding.UTF8.GetBytes("Chat already have max count");
+                        server.SendAsync(refusal, refusal.Length, clientEndPoint);
+                    }
                     break;
                 case LEAVE_CMD:
                     Remove(clientEndPoint);
@@ -44,6 +53,12 @@ public class ChatServer
     private void AddMember(IPEndPoint member)
     {
         members.Add(member);
+
+        if (IsMaxCountOfMembers())
+        {
+            SendToAll(Encoding.UTF8.GetBytes("Chat already have max count"));
+            _isMaxCount = true;
+        }
     }
 
     private void Remove(IPEndPoint member)
@@ -58,4 +73,19 @@ public class ChatServer
             server.SendAsync(data, data.Length, m);
         }
     }
+
+    private bool IsMaxCountOfMembers()
+    {
+        if (members.Count == MAX_OF_MEMBERS)
+            return true;
+        else
+            return false;
+    }
+
+    //public void Exite()
+    //{
+    //    byte[] info = Encoding.UTF8.GetBytes("Server is out of network");
+
+    //    SendToAll(info);
+    //}
 }

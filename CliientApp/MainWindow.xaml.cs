@@ -103,7 +103,7 @@ namespace CliientApp
             if (loginForm.IsLogin == true)
             {
                 JoinBtn.IsEnabled = true;
-
+                LoginBtn.IsEnabled = false;
                 _login = loginForm.Login!;
             }
         }
