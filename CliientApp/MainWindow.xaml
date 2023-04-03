@@ -35,7 +35,24 @@
         </DockPanel>
         <TextBlock DockPanel.Dock="Top" TextAlignment="Center" FontWeight="Bold" FontSize="20" Foreground="White">Chat</TextBlock>
         <TextBlock DockPanel.Dock="Top" TextAlignment="Left" FontWeight="Bold" FontSize="15" Foreground="White" Margin="5">Members</TextBlock>
-        <ListBox DockPanel.Dock="Left" Width="150" ItemsSource="{Binding Members}"></ListBox>
+        <ListBox DockPanel.Dock="Left" Width="200" ItemsSource="{Binding Members}">
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <ListBoxItem >
+                        <Grid HorizontalAlignment="Stretch">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <Label Grid.Column="0"  Content="{Binding Login}" ></Label>
+                            <Button Grid.Column="1" Width="50">Chat</Button>
+                        </Grid>
+
+                    </ListBoxItem >
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
         <ListBox ItemsSource="{Binding Messeges}" Background="#fff1ff" Foreground="Black"></ListBox>
     </DockPanel>
 </Window>

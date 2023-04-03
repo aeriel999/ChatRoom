@@ -46,24 +46,6 @@ public class ChatServer
             }
             else
                 SendToAll(data);
-            //switch (msg)
-            //{
-            //    case JOIN_CMD:
-            //        if (!_isMaxCount)
-            //            AddMember(clientEndPoint);
-            //        else
-            //        {
-            //            byte[] refusal = Encoding.UTF8.GetBytes("Chat already have max count");
-            //            server.SendAsync(refusal, refusal.Length, clientEndPoint);
-            //        }
-            //        break;
-            //    case LEAVE_CMD:
-            //        Remove(clientEndPoint);
-            //        break;
-            //    default:
-            //        SendToAll(data);
-            //        break;
-            //}
         }
     }
 
