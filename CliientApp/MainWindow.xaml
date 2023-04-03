@@ -27,6 +27,8 @@
             
         </Grid>
         <DockPanel DockPanel.Dock="Top">
+            <!--<Label VerticalAlignment="Bottom" FontWeight="Bold" FontSize="16" Name="LoginLB" Background="#fff1ff"></Label>-->
+
             <Label VerticalAlignment="Bottom" FontWeight="Bold" FontSize="16">Messege:</Label>
 
             <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Click="SendBtnClick" Name="SendBtn">Send</Button>
@@ -41,7 +43,7 @@
                     <ListBoxItem >
                         <DockPanel HorizontalAlignment="Stretch" Width="250">
                             <Label HorizontalAlignment="Left" Content="{Binding Login}" ></Label>
-                            <Button DockPanel.Dock="Right" Width="100" HorizontalAlignment="Right">Private chat</Button>
+                            <Button DockPanel.Dock="Right" Width="110" HorizontalAlignment="Right" Click="OpenPrivateChateBtnClick">Private chat</Button>
                         </DockPanel>
 
                     </ListBoxItem >

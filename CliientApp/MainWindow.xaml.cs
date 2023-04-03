@@ -125,7 +125,15 @@ namespace CliientApp
                 JoinBtn.IsEnabled = true;
                 LoginBtn.IsEnabled = false;
                 _login = loginForm.Login!;
+               // LoginLB.Content = _login;
             }
+        }
+
+        private void OpenPrivateChateBtnClick(object sender, RoutedEventArgs e)
+        {
+            Private_Chate chate = new Private_Chate();
+
+            chate.ShowDialog();
         }
     }
 
