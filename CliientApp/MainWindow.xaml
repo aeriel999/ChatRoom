@@ -36,21 +36,59 @@
             <TextBox Margin="5" VerticalContentAlignment="Center" Name="msgTB"></TextBox>
         </DockPanel>
         <TextBlock DockPanel.Dock="Top" TextAlignment="Center" FontWeight="Bold" FontSize="20" Foreground="White">Chat</TextBlock>
-        <TextBlock DockPanel.Dock="Top" TextAlignment="Left" FontWeight="Bold" FontSize="15" Foreground="White" Margin="5">Members</TextBlock>
-        <ListBox DockPanel.Dock="Left" ItemsSource="{Binding Members}" >
-            <ListBox.ItemTemplate>
-                <DataTemplate>
-                    <ListBoxItem >
-                        <DockPanel HorizontalAlignment="Stretch" Width="250">
-                            <Label HorizontalAlignment="Left" Content="{Binding Login}" ></Label>
-                            <Button DockPanel.Dock="Right" Width="110" HorizontalAlignment="Right" Click="OpenPrivateChateBtnClick">Private chat</Button>
-                        </DockPanel>
+        <DockPanel DockPanel.Dock="Left">
+            <TextBlock DockPanel.Dock="Top" TextAlignment="Left" FontWeight="Bold" FontSize="15" Foreground="White" Margin="5">Members</TextBlock>
 
-                    </ListBoxItem >
-                </DataTemplate>
-            </ListBox.ItemTemplate>
-        </ListBox>
-        
-        <ListBox ItemsSource="{Binding Messeges}" Background="#fff1ff" Foreground="Black"></ListBox>
+            <ItemsControl Name="MembersLsB" Width="200" DockPanel.Dock="Top"
+  ItemsSource="{Binding Members}"
+  Grid.IsSharedSizeScope="True">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate
+      >
+                        <Border
+        x:Name="Border"
+        Padding="8"
+        BorderThickness="0 0 0 1"
+        BorderBrush="{DynamicResource MaterialDesignDivider}">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition
+              SharedSizeGroup="Checkerz" />
+                                    <ColumnDefinition />
+                                </Grid.ColumnDefinitions>
+                                <ToggleButton Click="OpenPrivateChateBtnClick"
+            VerticalAlignment="Center"
+            IsChecked="{Binding IsSelected}"
+            Style="{StaticResource MaterialDesignActionLightToggleButton}"
+            Content="{Binding Initial}" />
+                                <StackPanel
+            Margin="8 0 0 0"
+            Grid.Column="1">
+                                    <TextBlock
+              FontWeight="Bold"
+              Text="{Binding Login}" />
+                                    <TextBlock
+              Text="0 posts" />
+                                </StackPanel>
+                            </Grid>
+                        </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger
+          Binding="{Binding IsSelected}"
+          Value="True">
+                                <Setter
+            TargetName="Border"
+            Property="Background"
+            Value="{DynamicResource MaterialDesignSelection}" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Label  DockPanel.Dock="Bottom" FontStyle="Italic" FontSize="10" Foreground="#FFDBBBE0">*Click for icon to start private chat</Label>
+
+        </DockPanel>
+
+        <ListBox DockPanel.Dock="Right" ItemsSource="{Binding Messeges}" Background="#fff1ff" Foreground="Black"></ListBox>
     </DockPanel>
 </Window>

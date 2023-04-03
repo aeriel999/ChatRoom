@@ -131,9 +131,16 @@ namespace CliientApp
 
         private void OpenPrivateChateBtnClick(object sender, RoutedEventArgs e)
         {
-            Private_Chate chate = new Private_Chate();
+            foreach (var item in model.Members)
+            {
+                if(item.IsSelected)
+                    MessageBox.Show(item.Login);
 
-            chate.ShowDialog();
+            }
+
+            //Private_Chate chate = new Private_Chate();
+
+            //chate.ShowDialog();
         }
     }
 
@@ -160,9 +167,14 @@ namespace CliientApp
         }
     }
 
+    
     class MemberInfo
     {
         public string Login { get; set; }
+
+        public bool IsSelected { get; set; }
+
+        public string Initial { get; set; } = "L";
 
         public MemberInfo(string login)
         {
