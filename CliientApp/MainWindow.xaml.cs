@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using MaterialDesignThemes.Wpf.Converters;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
+using System.Drawing;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -24,15 +26,17 @@ namespace CliientApp
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ViewModel model = null;
         private IPEndPoint _serverEndPoint;
         private UdpClient _client;
-        private ObservableCollection<MessegeInfo> _messeges = new ObservableCollection<MessegeInfo>();
         private string _login;
+        private string _adding = "<ADD.MEMBER>";
         public MainWindow()
         {
             InitializeComponent();
 
-            this.DataContext = _messeges;
+            model = new ViewModel();
+            this.DataContext = model;
 
             _client = new UdpClient();
 
@@ -56,13 +60,27 @@ namespace CliientApp
 
         private void JoinBtnClick(object sender, RoutedEventArgs e)
         {
-            string msg = "$<join>";
+            string msg = "$<join>" + _login;
             SendMsg(msg);
             Listen();
 
             LeaveBtn.IsEnabled = true;
             JoinBtn.IsEnabled = false;
             SendBtn.IsEnabled = true;
+        }
+
+        private void AddNewMember(string msg)
+        {
+            try
+            {
+                string[] new_member = msg.Split(new char[] { '$' });
+
+                model.AddMember(new MemberInfo() { Adress = IPEndPoint.Parse(new_member[1]), Login = new_member[2] });
+            }
+            catch (System.Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
         }
 
         private async void SendMsg(string msg)
@@ -76,12 +94,14 @@ namespace CliientApp
         {
             while (true)
             {
-                IPEndPoint? remoteIp = null;
                 var result = await _client.ReceiveAsync();
 
                 string msg = Encoding.UTF8.GetString(result.Buffer);
 
-                _messeges.Add(new MessegeInfo(msg));
+                if (msg.Contains(_adding))
+                    AddNewMember(msg);
+                else
+                    model.Add(new MessegeInfo(msg));
             }
         }
 
@@ -106,6 +126,35 @@ namespace CliientApp
                 LoginBtn.IsEnabled = false;
                 _login = loginForm.Login!;
             }
+        }
+    }
+
+    class ViewModel
+    {
+        private ObservableCollection<MessegeInfo> _messeges = new ObservableCollection<MessegeInfo>();
+        private ObservableCollection<MemberInfo> _members = new ObservableCollection<MemberInfo>();
+
+        public IEnumerable<MessegeInfo> Messeges => _messeges;
+        public void Add(MessegeInfo info)
+        {
+            _messeges.Add(info);
+        }
+
+        public IEnumerable<MemberInfo> Members => _members;
+        public void AddMember(MemberInfo info)
+        {
+            _members.Add(info);
+        }
+    }
+
+    class MemberInfo
+    {
+        public string Login { get; set; }
+
+        public IPEndPoint Adress { get; set; }
+        public override string ToString()
+        {
+            return Login;
         }
     }
 }

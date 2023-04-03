@@ -34,6 +34,8 @@
             <TextBox Margin="5" VerticalContentAlignment="Center" Name="msgTB"></TextBox>
         </DockPanel>
         <TextBlock DockPanel.Dock="Top" TextAlignment="Center" FontWeight="Bold" FontSize="20" Foreground="White">Chat</TextBlock>
-        <ListBox ItemsSource="{Binding}" Background="#fff1ff" Foreground="Black"></ListBox>
+        <TextBlock DockPanel.Dock="Top" TextAlignment="Left" FontWeight="Bold" FontSize="15" Foreground="White" Margin="5">Members</TextBlock>
+        <ListBox DockPanel.Dock="Left" Width="150" ItemsSource="{Binding Members}"></ListBox>
+        <ListBox ItemsSource="{Binding Messeges}" Background="#fff1ff" Foreground="Black"></ListBox>
     </DockPanel>
 </Window>
