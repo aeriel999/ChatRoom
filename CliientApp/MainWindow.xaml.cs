@@ -75,7 +75,7 @@ namespace CliientApp
             {
                 string[] new_member = msg.Split(new char[] { '$' });
 
-                model.AddMember(new MemberInfo() { Adress = IPEndPoint.Parse(new_member[1]), Login = new_member[2] });
+                model.AddMember(new MemberInfo(new_member[1]));
             }
             catch (System.Exception ex)
             {
@@ -145,16 +145,20 @@ namespace CliientApp
         {
             _members.Add(info);
         }
+
+        public ViewModel()
+        {
+            AddMember(new MemberInfo("Login"));
+        }
     }
 
     class MemberInfo
     {
         public string Login { get; set; }
 
-        public IPEndPoint Adress { get; set; }
-        public override string ToString()
+        public MemberInfo(string login)
         {
-            return Login;
+            Login = login;
         }
     }
 }

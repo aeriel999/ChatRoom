@@ -51,7 +51,7 @@ public class ChatServer
 
     private void AddMember(IPEndPoint member, string msg)
     {
-        SendToAll(GetIPAndLogin(member, msg));
+        SendToAll(GetIPAndLogin(msg));
         SendToOne(member);
         members.Add((member, msg));
 
@@ -89,18 +89,18 @@ public class ChatServer
             return false;
     }
 
-    private byte[] GetIPAndLogin(IPEndPoint ip, string msg)
+    private byte[] GetIPAndLogin(string msg)
     {
         string login = new string(msg.Except(JOIN_CMD).ToArray());
 
-        return Encoding.UTF8.GetBytes("<ADD.MEMBER>" + "$" + ip.ToString() + "$" + login);
+        return Encoding.UTF8.GetBytes("<ADD.MEMBER>" + "$" + login);
     }
 
     private void SendToOne(IPEndPoint ip)
     {
         foreach (var m in members)
         {
-            byte[] data = GetIPAndLogin(m.Item1, m.Item2);
+            byte[] data = GetIPAndLogin(m.Item2);
 
             server.SendAsync(data, data.Length, ip);
         }
