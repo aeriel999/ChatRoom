@@ -1,4 +1,6 @@
 ﻿using MaterialDesignThemes.Wpf.Converters;
+using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Configuration;
@@ -133,14 +135,15 @@ namespace CliientApp
         {
             foreach (var item in model.Members)
             {
-                if(item.IsSelected)
-                    MessageBox.Show(item.Login);
+                if (item.IsSelected)
+                {
+                    Private_Chate chate = new Private_Chate(item.Login);
 
+                    chate.ShowDialog();
+
+                    item.IsSelected = false;
+                }
             }
-
-            //Private_Chate chate = new Private_Chate();
-
-            //chate.ShowDialog();
         }
     }
 
@@ -167,18 +170,20 @@ namespace CliientApp
         }
     }
 
-    
+    [AddINotifyPropertyChangedInterface]
     class MemberInfo
     {
         public string Login { get; set; }
 
         public bool IsSelected { get; set; }
 
-        public string Initial { get; set; } = "L";
+        public string Initial { get; }  
 
         public MemberInfo(string login)
         {
             Login = login;
+
+            Initial =  Login.ToCharArray().First().ToString();
         }
     }
 }

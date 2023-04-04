@@ -1,4 +1,5 @@
-﻿using System;
+﻿using PropertyChanged;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -17,11 +18,17 @@ namespace CliientApp
     /// <summary>
     /// Interaction logic for Private_Chate.xaml
     /// </summary>
+    [AddINotifyPropertyChangedInterface]
     public partial class Private_Chate : Window
     {
-        public Private_Chate()
+        public string Login { get; set; }
+        public Private_Chate(string login)
         {
             InitializeComponent();
+
+            Login = login;
+
+            this.DataContext = this;
         }
     }
 }
