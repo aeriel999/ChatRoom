@@ -26,33 +26,39 @@ namespace CliientApp
     [AddINotifyPropertyChangedInterface]
     public partial class Private_Chate : Window
     {
-        public string Login { get; set; }
-
         private IPEndPoint point = null;
         private TcpClient client = null;
-        NetworkStream ns = null;
-        StreamWriter sw = null;
-        StreamReader sr = null;
+        private NetworkStream ns = null;
+        private StreamWriter sw = null;
+        private StreamReader sr = null;
+        private ObservableCollection<MessegeInfo> _privateMesseges = new ObservableCollection<MessegeInfo>();
+        private ViewModel model = null;
 
-        private ObservableCollection<MessegeInfo> messeges = new ObservableCollection<MessegeInfo>();
-        public Private_Chate(string login, IPEndPoint endPoint)
+        public Private_Chate(string sendLogin, string login, IPEndPoint endPoint)
         {
             InitializeComponent();
 
-            this.DataContext = messeges;
+            this.DataContext = _privateMesseges;
 
-           // Login = login;
+            Login = login;
+
+            SendLogin = sendLogin;
+
+            model = new ViewModel();
 
            //point = endPoint;
 
-           //client = new TcpClient();
+            //client = new TcpClient();
 
-           //client.Connect(point);
+            //client.Connect(point);
 
-           //ns = client.GetStream();
+            //ns = client.GetStream();
 
-           //Listen();
+            //Listen();
         }
+
+        public string Login { get; set; }
+        public string SendLogin { get; set; }
 
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -88,7 +94,7 @@ namespace CliientApp
                 sr = new StreamReader(ns);
                 string response = sr.ReadLine();
 
-                messeges.Add(new MessegeInfo(response));
+                _privateMesseges.Add(new MessegeInfo(response));
             }
         }
     }

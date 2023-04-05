@@ -21,6 +21,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using static CliientApp.ViewModel;
 
 namespace CliientApp
 {
@@ -35,12 +36,12 @@ namespace CliientApp
         private string _login;
         private string _privateChateLogin;
 
-
         public MainWindow()
         {
             InitializeComponent();
 
             model = new ViewModel();
+
             this.DataContext = model;
 
             string serverAdress = ConfigurationManager.AppSettings["ServerAddress"]!;
@@ -56,7 +57,7 @@ namespace CliientApp
         }
 
         private void Connect()
-        { 
+        {
             _client = new UdpClient();
         }
         private void Disconnect()
@@ -115,12 +116,10 @@ namespace CliientApp
 
                     if (msg.Contains(Commands.ADD_CMD))
                         AddNewMember(msg);
-                    else if (msg.Contains(Commands.NEWMSG_CMD))
-                        NotifyAboutPrivateChate(msg);
-                    else if (msg.Contains(Commands.OPENCHAT_CMD))
-                    {
+                    else if (msg.Contains(Commands.NEW_MSG_CMD))
+                        NotifyAboutPrivateChat(msg);
+                    else if (msg.Contains(Commands.OPEN_SENT_CHAT_CMD))
                         StartPrivateChate(msg);
-                    }
                     else
                         model.Add(new MessegeInfo(msg));
                 }
@@ -131,12 +130,13 @@ namespace CliientApp
             }
         }
 
-        private void NotifyAboutPrivateChate(string msg)
+        private void NotifyAboutPrivateChat(string msg)
         {
-            string login = new string(msg.Except(Commands.NEWMSG_CMD).ToArray());
+            string login = new string(msg.Except(Commands.NEW_MSG_CMD).ToArray());
 
-            model.GetMember(login).Post = "You have a new post";
+            model.NotifyAboutNewChat(login);
         }
+
         private void LeaveBtnClick(object sender, RoutedEventArgs e)
         {
             SendMsg(Commands.LEAVE_CMD);
@@ -157,7 +157,7 @@ namespace CliientApp
                 JoinBtn.IsEnabled = true;
                 LoginBtn.IsEnabled = false;
                 _login = loginForm.Login!;
-               // LoginLB.Content = _login;
+                // LoginLB.Content = _login;
             }
         }
 
@@ -176,17 +176,17 @@ namespace CliientApp
 
         private void StartPrivateChate(string msg)
         {
-            string ip = new string(msg.Except(Commands.OPENCHAT_CMD).ToArray());
+            string ip = new string(msg.Except(Commands.OPEN_SENT_CHAT_CMD).ToArray());
 
             Disconnect();
 
-            Private_Chate chate = new Private_Chate(_privateChateLogin, IPEndPoint.Parse(ip));
+            Private_Chate chate = new Private_Chate(_login, _privateChateLogin, IPEndPoint.Parse(ip));
 
             chate.ShowDialog();
         }
     }
 
-    class ViewModel
+    public class ViewModel
     {
         private ObservableCollection<MessegeInfo> _messeges = new ObservableCollection<MessegeInfo>();
         private ObservableCollection<MemberInfo> _members = new ObservableCollection<MemberInfo>();
@@ -203,32 +203,48 @@ namespace CliientApp
             _members.Add(info);
         }
 
+        public void NotifyAboutNewChat(string login)
+        {
+            foreach (var m in _members)
+            {
+                if (m.Login == login)
+                {
+                    m.Post = "You have a new post";
+                    m.IsRequest = true;
+                }
+            }
+        }
+
         public MemberInfo GetMember(string login)
         {
             foreach (var m in _members)
             {
-                if(m.Login == login)
+                if (m.Login == login)
                     return m;
             }
 
-            return null;
+            return new MemberInfo();
         }
     }
 
-    [AddINotifyPropertyChangedInterface]
-    class MemberInfo
-    {
-        public string Login { get; set; }
-        public string Post { get; set; }
-        public bool IsSelected { get; set; }
+    //[AddINotifyPropertyChangedInterface]
+    //public class MemberInfo
+    //{
+    //    public string Login { get; set; }
+    //    public string Post { get; set; }
+    //    public bool IsSelected { get; set; }
+    //    public bool IsRequest { get; set; }
+    //    public string Initial { get; }
 
-        public string Initial { get; }  
+    //    public MemberInfo() { }
 
-        public MemberInfo(string login)
-        {
-            Login = login;
+    //    public MemberInfo(string login)
+    //    {
+    //        Login = login;
 
-            Initial =  Login.ToCharArray().First().ToString();
-        }
-    }
+    //        Initial = Login.ToCharArray().First().ToString();
+
+    //        IsRequest = false;
+    //    }
+    //}
 }

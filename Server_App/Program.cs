@@ -6,8 +6,7 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-
-
+using MemberInfo = Command_And_Members.MemberInfo;
 
 ChatServer server = new ChatServer();
 
@@ -17,12 +16,15 @@ public class ChatServer
 {
     private const string ADDRESS = "127.0.0.1";
     private const short PORT = 4040;
-   
-    private HashSet<(IPEndPoint, string)> members = new HashSet<(IPEndPoint, string)>();//make identity
     private UdpClient server = new UdpClient(PORT);
     private IPEndPoint clientEndPoint = null;
     private const int MAX_OF_MEMBERS = 3;
     private bool _isMaxCount = false;
+    private MemberInfo _room = new MemberInfo();
+    public ChatServer()
+    {
+       // _room = 
+    }
 
     public void Start()
     {
@@ -46,15 +48,15 @@ public class ChatServer
             }
             else if (msg == Commands.LEAVE_CMD)
             {
-                Remove(clientEndPoint);
+                _room.RemoveMemberFromChat(clientEndPoint);
             }
             else if (msg.Contains(Commands.PRIVATE_CMD))
             {
                 IPEndPoint ip = GetIp(msg);
-                byte[] prChat = Encoding.UTF8.GetBytes(Commands.NEWMSG_CMD + GetLogin(clientEndPoint));
+                byte[] prChat = Encoding.UTF8.GetBytes(Commands.NEW_MSG_CMD + GetLogin(clientEndPoint));
                 server.SendAsync(prChat, prChat.Length, ip);
 
-                byte[] start = Encoding.UTF8.GetBytes(Commands.OPENCHAT_CMD + ip.ToString());
+                byte[] start = Encoding.UTF8.GetBytes(Commands.OPEN_SENT_CHAT_CMD + ip.ToString());
                 server.SendAsync(start, start.Length, clientEndPoint);
             }
             else
@@ -64,7 +66,7 @@ public class ChatServer
 
     private string GetLogin(IPEndPoint member)
     {
-        foreach (var m in members)
+        foreach (var m in _room.Members)
         {
             if (m.Item1.ToString() == member.ToString())
             {
@@ -80,7 +82,7 @@ public class ChatServer
         SendToAll(GetIPAndLogin(msg));
         SendToOneAboutMembers(member);
         string login = new string(msg.Except(Commands.JOIN_CMD).ToArray());
-        members.Add((member, login));
+        _room.AddNewMemberToChat(member, login);
 
         if (IsMaxCountOfMembers())
         {
@@ -89,18 +91,9 @@ public class ChatServer
         }
     }
 
-    private void Remove(IPEndPoint member)
-    {
-        foreach (var m in members)
-        {
-            if(m.Item1 == member)
-                members.Remove(m);
-        }
-    }
-
     private void SendToAll(byte[] data)
     {
-        foreach (var m in members)
+        foreach (var m in _room.Members)
         {
             server.SendAsync(data, data.Length, m.Item1);
         }
@@ -108,7 +101,7 @@ public class ChatServer
 
     private bool IsMaxCountOfMembers()
     {
-        if (members.Count == MAX_OF_MEMBERS)
+        if (_room.Members.Count == MAX_OF_MEMBERS)
             return true;
         else
             return false;
@@ -123,7 +116,7 @@ public class ChatServer
 
     private void SendToOneAboutMembers(IPEndPoint ip)
     {
-        foreach (var m in members)
+        foreach (var m in _room.Members)
         {
             byte[] data = GetIPAndLogin(m.Item2);
 
@@ -135,7 +128,7 @@ public class ChatServer
     {
         string login = new string(msg.Except(Commands.PRIVATE_CMD).ToArray());
 
-        foreach (var m in members)
+        foreach (var m in _room.Members)
         { 
             if(m.Item2 == login)
                 return m.Item1;
@@ -144,65 +137,4 @@ public class ChatServer
         return null;
     }
 
-    //private void TctConnect(IPEndPoint ip)
-    //{
-    //    IPAddress iPAddress = IPAddress.Parse(ADDRESS);
-    //    IPEndPoint ipPoint = new IPEndPoint(iPAddress, PORT);
-    //    TcpListener listener = new TcpListener(ipPoint);
-    //    StreamReader sr = null;
-    //    NetworkStream ns = null;
-
-    //    try
-    //    {
-    //        listener.Start(10);
-
-    //        Console.WriteLine("Server started! Waiting for connection...");
-
-    //        TcpClient server = listener.AcceptTcpClient();
-
-    //        Console.WriteLine("Connected!");
-
-    //        while (server.Connected)
-    //        {
-    //            ns = server.GetStream();
-
-    //            sr = new StreamReader(ns);
-    //            string response = sr.ReadLine();
-
-    //            Console.WriteLine($"{server.Client.RemoteEndPoint} - {response} at {DateTime.Now.ToShortTimeString()}");
-    //        }
-    //        server.Close();
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        Console.WriteLine(ex.Message);
-    //    }
-    //    finally
-    //    {
-    //        sr.Close();
-    //        ns.Close();
-    //        listener.Stop();
-    //    }
-    //}
-
-    //private void SentPrivateMsg(string msg, IPEndPoint ip)
-    //{
-    //    StreamWriter sw = null;
-    //    NetworkStream ns = null;
-
-
-    //    while (true)
-    //    {
-    //        TcpClient  client = new TcpClient();
-
-    //        client.Connect(ip);
-
-    //        ns = client.GetStream();
-
-    //        sw = new StreamWriter(ns);  
-    //        sw.WriteLine(msg);
-
-    //        sw.Flush();
-    //    }
-    //}
 }
