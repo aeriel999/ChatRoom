@@ -33,13 +33,13 @@
             <DockPanel DockPanel.Dock="Top">
                 <Label VerticalAlignment="Bottom" FontWeight="Bold" FontSize="16">Messege:</Label>
 
-                <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Name="SendBtn">Send</Button>
+                <Button Padding="10,5" Margin="5" DockPanel.Dock="Right" Name="SendBtn" Click="SendBtn_Click">Send</Button>
 
                 <TextBox Margin="5" VerticalContentAlignment="Center" Name="msgTB"></TextBox>
             </DockPanel>
             <TextBlock DockPanel.Dock="Top" TextAlignment="Center" FontWeight="Bold" FontSize="20" Foreground="White" Margin="5">Chat</TextBlock>
 
-            <ListBox ItemsSource="{Binding Messeges}" Background="#fff1ff" Foreground="Black"></ListBox>
+            <ListBox ItemsSource="{Binding}" Background="#fff1ff" Foreground="Black"></ListBox>
         </DockPanel>
     </Grid>
 </Window>

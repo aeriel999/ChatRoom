@@ -1,4 +1,5 @@
-﻿using MaterialDesignThemes.Wpf.Converters;
+﻿using Command_And_Members;
+using MaterialDesignThemes.Wpf.Converters;
 using PropertyChanged;
 using System;
 using System.Collections.Generic;
@@ -32,15 +33,15 @@ namespace CliientApp
         private IPEndPoint _serverEndPoint;
         private UdpClient _client;
         private string _login;
-        private string _adding = "<ADD.MEMBER>";
+        private string _privateChateLogin;
+
+
         public MainWindow()
         {
             InitializeComponent();
 
             model = new ViewModel();
             this.DataContext = model;
-
-            _client = new UdpClient();
 
             string serverAdress = ConfigurationManager.AppSettings["ServerAddress"]!;
             short serverPort = short.Parse(ConfigurationManager.AppSettings["ServerPort"])!;
@@ -54,6 +55,15 @@ namespace CliientApp
             SendBtn.IsEnabled = false;
         }
 
+        private void Connect()
+        { 
+            _client = new UdpClient();
+        }
+        private void Disconnect()
+        {
+            _client.Close();
+        }
+
         private async void SendBtnClick(object sender, RoutedEventArgs e)
         {
             string msg = _login + " : " + msgTB.Text;
@@ -62,7 +72,8 @@ namespace CliientApp
 
         private void JoinBtnClick(object sender, RoutedEventArgs e)
         {
-            string msg = "$<join>" + _login;
+            Connect();
+            string msg = Commands.JOIN_CMD + _login;
             SendMsg(msg);
             Listen();
 
@@ -75,9 +86,9 @@ namespace CliientApp
         {
             try
             {
-                string[] new_member = msg.Split(new char[] { '$' });
+                string login = new string(msg.Except(Commands.ADD_CMD).ToArray());
 
-                model.AddMember(new MemberInfo(new_member[1]));
+                model.AddMember(new MemberInfo(login));
             }
             catch (System.Exception ex)
             {
@@ -94,24 +105,43 @@ namespace CliientApp
 
         private async void Listen()
         {
-            while (true)
+            try
             {
-                var result = await _client.ReceiveAsync();
+                while (true)
+                {
+                    var result = await _client.ReceiveAsync();
 
-                string msg = Encoding.UTF8.GetString(result.Buffer);
+                    string msg = Encoding.UTF8.GetString(result.Buffer);
 
-                if (msg.Contains(_adding))
-                    AddNewMember(msg);
-                else
-                    model.Add(new MessegeInfo(msg));
+                    if (msg.Contains(Commands.ADD_CMD))
+                        AddNewMember(msg);
+                    else if (msg.Contains(Commands.NEWMSG_CMD))
+                        NotifyAboutPrivateChate(msg);
+                    else if (msg.Contains(Commands.OPENCHAT_CMD))
+                    {
+                        StartPrivateChate(msg);
+                    }
+                    else
+                        model.Add(new MessegeInfo(msg));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
             }
         }
 
+        private void NotifyAboutPrivateChate(string msg)
+        {
+            string login = new string(msg.Except(Commands.NEWMSG_CMD).ToArray());
+
+            model.GetMember(login).Post = "You have a new post";
+        }
         private void LeaveBtnClick(object sender, RoutedEventArgs e)
         {
-            SendMsg("$<leave>");
+            SendMsg(Commands.LEAVE_CMD);
 
-            _client.Close();
+            Disconnect();
 
             JoinBtn.IsEnabled = true;
         }
@@ -137,13 +167,22 @@ namespace CliientApp
             {
                 if (item.IsSelected)
                 {
-                    Private_Chate chate = new Private_Chate(item.Login);
-
-                    chate.ShowDialog();
-
+                    SendMsg(Commands.PRIVATE_CMD + item.Login);
+                    _privateChateLogin = item.Login;
                     item.IsSelected = false;
                 }
             }
+        }
+
+        private void StartPrivateChate(string msg)
+        {
+            string ip = new string(msg.Except(Commands.OPENCHAT_CMD).ToArray());
+
+            Disconnect();
+
+            Private_Chate chate = new Private_Chate(_privateChateLogin, IPEndPoint.Parse(ip));
+
+            chate.ShowDialog();
         }
     }
 
@@ -164,9 +203,15 @@ namespace CliientApp
             _members.Add(info);
         }
 
-        public ViewModel()
+        public MemberInfo GetMember(string login)
         {
-            AddMember(new MemberInfo("Login"));
+            foreach (var m in _members)
+            {
+                if(m.Login == login)
+                    return m;
+            }
+
+            return null;
         }
     }
 
@@ -174,7 +219,7 @@ namespace CliientApp
     class MemberInfo
     {
         public string Login { get; set; }
-
+        public string Post { get; set; }
         public bool IsSelected { get; set; }
 
         public string Initial { get; }  

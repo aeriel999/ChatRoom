@@ -68,7 +68,7 @@
               FontWeight="Bold"
               Text="{Binding Login}" />
                                     <TextBlock
-              Text="0 posts" />
+              Text="{Binding Post}" />
                                 </StackPanel>
                             </Grid>
                         </Border>
