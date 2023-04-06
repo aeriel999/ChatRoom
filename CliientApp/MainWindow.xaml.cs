@@ -114,7 +114,7 @@ namespace CliientApp
         {
             try
             {
-                while (/*!_isPrivateChat*/true)
+                while (!_isPrivateChat)
                 {
                     var result = await _client.ReceiveAsync();
 
@@ -165,6 +165,7 @@ namespace CliientApp
                 JoinBtn.IsEnabled = true;
                 LoginBtn.IsEnabled = false;
                 _login = loginForm.Login!;
+                loginTB.Text = _login;
                 // LoginLB.Content = _login;
             }
         }
@@ -190,11 +191,11 @@ namespace CliientApp
 
             Private_Chate chate = new Private_Chate(_login, _privateChateLogin, _isRquest);
 
-            Disconnect();
-
             chate.ShowDialog();
 
-            //Connect();
+            _isPrivateChat = false;
+
+            Listen();
         }
 
         //private void StartPrivateChate(string msg)

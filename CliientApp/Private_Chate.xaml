@@ -32,14 +32,12 @@
 
                 <Button Foreground="AliceBlue"  Grid.Column="1"  Grid.Row="0"
                         Style="{StaticResource MaterialDesignFlatButton}"
-                        ToolTip="MaterialDesignFlatButton">Exit
+                        ToolTip="MaterialDesignFlatButton" Click="ExitBtnClick">Exit
                 </Button>
                 <TextBlock Grid.Row="1" Grid.Column="0" Foreground="AliceBlue" FontWeight="Bold" FontSize="15" TextAlignment="Left" Margin="5"
                           >
                 <Run Foreground="Aqua" Text="{Binding Conection}"/>
                 </TextBlock>
-
-                <Button Grid.Row="1" Grid.Column="1" Click="Button_Click">Connect</Button>
                 
             </Grid>
             <DockPanel DockPanel.Dock="Top">

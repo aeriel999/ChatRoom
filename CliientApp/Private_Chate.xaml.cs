@@ -58,7 +58,6 @@ namespace CliientApp
         {
             if (!IsRequest)
                 await SendConnectAsync();
-
             else
                 await GetConnectAsync();
 
@@ -148,7 +147,7 @@ namespace CliientApp
 
             try
             {
-                while (client.Connected)
+                do
                 {
                     ns = client.GetStream();
 
@@ -157,7 +156,18 @@ namespace CliientApp
                     string response = await sr.ReadLineAsync();
 
                     _privateMesseges.Add(new MessegeInfo($"{SendLogin}: {response}"));
-                }
+                } while (client.Connected);
+
+                //if (!IsRequest)
+                //    listener.Stop();
+
+                //client.Close();
+
+                //sr.Close();
+                //sw.Close();
+                //ns.Close();
+
+                //this.Close();
             }
             catch (Exception ex)
             {
@@ -184,32 +194,18 @@ namespace CliientApp
             }
         }
 
-        private void GetConnect()
+        private void ExitBtnClick(object sender, RoutedEventArgs e)
         {
-            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint);
+            //if (!IsRequest)
+            //    listener.Stop();
 
-            client = new TcpClient();
+            //client.Close();
 
-            try
-            {
-                client.ConnectAsync(point);
+            //sr.Close();
+            //sw.Close();
+            //ns.Close();
 
-                Listen();
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-        }
-            private void Button_Click(object sender, RoutedEventArgs e)
-        {
-            if (!IsRequest)
-            {
-                    SendConnect();
-            }
-            else
-                GetConnect();
+            this.Close();
         }
     }
 }

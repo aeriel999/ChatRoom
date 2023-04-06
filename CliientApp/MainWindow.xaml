@@ -21,10 +21,15 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Padding="10,5" Margin="5" Grid.Column="2" Click="LeaveBtnClick" Name="LeaveBtn">Leave</Button>
-            <Button Padding="10,5" Margin="5" Grid.Column="1" Click="JoinBtnClick"  Name="JoinBtn">Join</Button>
-            <Button Padding="10,5" Margin="5" Grid.Column="0" Click="LoginBtnClick" Name="LoginBtn">Login</Button>
-            
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+            <Button Padding="10,5" Margin="5" Grid.Column="2" Grid.Row="1" Click="LeaveBtnClick" Name="LeaveBtn">Leave</Button>
+            <Button Padding="10,5" Margin="5" Grid.Column="1" Grid.Row="1" Click="JoinBtnClick"  Name="JoinBtn">Join</Button>
+            <Button Padding="10,5" Margin="5" Grid.Column="0" Grid.Row="1" Click="LoginBtnClick" Name="LoginBtn">Login</Button>
+            <TextBlock Grid.Row="0" Grid.Column="1" Name="loginTB" TextAlignment="Center" FontWeight="Bold" 
+                       FontSize="20" Foreground="White"></TextBlock>
         </Grid>
         <DockPanel DockPanel.Dock="Top">
             <!--<Label VerticalAlignment="Bottom" FontWeight="Bold" FontSize="16" Name="LoginLB" Background="#fff1ff"></Label>-->
