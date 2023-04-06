@@ -17,6 +17,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Shapes;
 using System.IO;
 using System.Collections.ObjectModel;
+using Command_And_Members;
 
 namespace CliientApp
 {
@@ -33,7 +34,7 @@ namespace CliientApp
         private StreamReader sr = null;
         private ObservableCollection<MessegeInfo> _privateMesseges = new ObservableCollection<MessegeInfo>();
         private ViewModel model = null;
-
+        private ChatRoomDB roomDB = new ChatRoomDB();
         public Private_Chate(string sendLogin, string login, IPEndPoint endPoint)
         {
             InitializeComponent();
@@ -46,7 +47,7 @@ namespace CliientApp
 
             model = new ViewModel();
 
-           //point = endPoint;
+            //point = endPoint;
 
             //client = new TcpClient();
 
@@ -55,36 +56,52 @@ namespace CliientApp
             //ns = client.GetStream();
 
             //Listen();
+
         }
 
         public string Login { get; set; }
         public string SendLogin { get; set; }
 
+        private void GetIp()
+        {
+            string a = roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint;
+            string b = roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint;
+
+            MessageBox.Show(a + " - " + b);
+
+        }
+
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-            try
-            {
-                while (true)
-                {
-                    string message = msgTB.Text;
+            GetIp();
+            //IPEndPoint a = Commands.GetIp(Login);
+            //IPEndPoint b = Commands.GetIp(SendLogin);
 
-                    sw = new StreamWriter(ns);
-                    sw.WriteLine(message);
+            //MessageBox.Show(a.ToString() + " - " + b.ToString());
 
-                    sw.Flush(); 
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-            finally
-            {
-                sw.Close();
-                sr.Close();
-                ns.Close();
-                client.Close();
-            }
+            //try
+            //{
+            //    while (true)
+            //    {
+            //        string message = msgTB.Text;
+
+            //        sw = new StreamWriter(ns);
+            //        sw.WriteLine(message);
+
+            //        sw.Flush(); 
+            //    }
+            //}
+            //catch (Exception ex)
+            //{
+            //    Console.WriteLine(ex.Message);
+            //}
+            //finally
+            //{
+            //    sw.Close();
+            //    sr.Close();
+            //    ns.Close();
+            //    client.Close();
+            //}
         }
 
         private void Listen()

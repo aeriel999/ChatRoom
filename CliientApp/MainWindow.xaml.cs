@@ -169,6 +169,7 @@ namespace CliientApp
                 {
                     SendMsg(Commands.PRIVATE_CMD + item.Login);
                     _privateChateLogin = item.Login;
+
                     item.IsSelected = false;
                 }
             }
@@ -227,24 +228,25 @@ namespace CliientApp
         }
     }
 
-    //[AddINotifyPropertyChangedInterface]
-    //public class MemberInfo
-    //{
-    //    public string Login { get; set; }
-    //    public string Post { get; set; }
-    //    public bool IsSelected { get; set; }
-    //    public bool IsRequest { get; set; }
-    //    public string Initial { get; }
+    [AddINotifyPropertyChangedInterface]
+    public class MemberInfo
+    {
+        public string Login { get; set; }
+        public string Post { get; set; }
+        public bool IsSelected { get; set; }
+        public bool IsRequest { get; set; }
+        public string Initial { get; }
+        public IPEndPoint Ip { get; set; }
 
-    //    public MemberInfo() { }
+        public MemberInfo() { }
 
-    //    public MemberInfo(string login)
-    //    {
-    //        Login = login;
+        public MemberInfo(string login)
+        {
+            Login = login;
 
-    //        Initial = Login.ToCharArray().First().ToString();
+            Initial = Login.ToCharArray().First().ToString();
 
-    //        IsRequest = false;
-    //    }
-    //}
+            IsRequest = false;
+        }
+    }
 }

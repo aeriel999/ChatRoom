@@ -1,14 +1,9 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Net;
 
 namespace CliientApp
 {
-    class ChatRoomDB : DbContext
+    public class ChatRoomDB : DbContext
     {
         public DbSet<Client> Clients { get; set; }
 
@@ -35,6 +30,8 @@ namespace CliientApp
 
             modelBuilder.Entity<Client>().Property(c => c.Password).IsRequired().HasMaxLength(24);
             modelBuilder.Entity<Client>().HasCheckConstraint("Password", "Password != '' AND Password LIKE N'[^./%$#@,]%'");
+
+            modelBuilder.Entity<Client>().Property(c => c.IPEndPoint).IsRequired(false);
 
             modelBuilder.Entity<Client>().HasData(new Client[]
             {
@@ -65,11 +62,5 @@ namespace CliientApp
                 });
 
         }
-    }
-    internal class Client
-    {
-        public int Id { get; set; }
-        public string Login { get; set; }    
-        public string Password { get; set; }    
     }
 }
