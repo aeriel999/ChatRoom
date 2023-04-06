@@ -35,6 +35,8 @@ namespace CliientApp
         private UdpClient _client;
         private string _login;
         private string _privateChateLogin;
+        private bool _isRquest;
+        private bool _isPrivateChat;
 
         public MainWindow()
         {
@@ -54,6 +56,10 @@ namespace CliientApp
             JoinBtn.IsEnabled = false;
 
             SendBtn.IsEnabled = false;
+
+            _isRquest = false;
+
+            _isPrivateChat = false;
         }
 
         private void Connect()
@@ -108,7 +114,7 @@ namespace CliientApp
         {
             try
             {
-                while (true)
+                while (!_isPrivateChat)
                 {
                     var result = await _client.ReceiveAsync();
 
@@ -118,15 +124,15 @@ namespace CliientApp
                         AddNewMember(msg);
                     else if (msg.Contains(Commands.NEW_MSG_CMD))
                         NotifyAboutPrivateChat(msg);
-                    else if (msg.Contains(Commands.OPEN_SENT_CHAT_CMD))
-                        StartPrivateChate(msg);
+                    //else if (msg.Contains(Commands.OPEN_SENT_CHAT_CMD))
+                    //    StartPrivateChate(msg);
                     else
                         model.Add(new MessegeInfo(msg));
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show("Listen MW  " + ex.Message);
             }
         }
 
@@ -135,6 +141,8 @@ namespace CliientApp
             string login = new string(msg.Except(Commands.NEW_MSG_CMD).ToArray());
 
             model.NotifyAboutNewChat(login);
+
+            _isRquest = true;
         }
 
         private void LeaveBtnClick(object sender, RoutedEventArgs e)
@@ -163,28 +171,42 @@ namespace CliientApp
 
         private void OpenPrivateChateBtnClick(object sender, RoutedEventArgs e)
         {
+            _isPrivateChat = true;
+
             foreach (var item in model.Members)
             {
                 if (item.IsSelected)
                 {
-                    SendMsg(Commands.PRIVATE_CMD + item.Login);
-                    _privateChateLogin = item.Login;
+                    if (!_isRquest)
+                    {
+                        SendMsg(Commands.PRIVATE_CMD + item.Login);
+
+                        _privateChateLogin = item.Login;
+                    }
 
                     item.IsSelected = false;
                 }
             }
-        }
 
-        private void StartPrivateChate(string msg)
-        {
-            string ip = new string(msg.Except(Commands.OPEN_SENT_CHAT_CMD).ToArray());
+           // Disconnect();
 
-            Disconnect();
-
-            Private_Chate chate = new Private_Chate(_login, _privateChateLogin, IPEndPoint.Parse(ip));
+            Private_Chate chate = new Private_Chate(_login, _privateChateLogin, _isRquest);
 
             chate.ShowDialog();
+
+            //Connect();
         }
+
+        //private void StartPrivateChate(string msg)
+        //{
+        //    string ip = new string(msg.Except(Commands.OPEN_SENT_CHAT_CMD).ToArray());
+
+        //    Disconnect();
+
+        //    Private_Chate chate = new Private_Chate(_login, _privateChateLogin, IPEndPoint.Parse(ip));
+
+        //    chate.ShowDialog();
+        //}
     }
 
     public class ViewModel

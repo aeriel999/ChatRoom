@@ -26,40 +26,48 @@ public class ChatServer
     {
         while (true)
         {
-            byte[] data = server.Receive(ref clientEndPoint);
-
-            string msg = Encoding.UTF8.GetString(data);
-
-            Console.WriteLine($"Got : {msg} at {DateTime.Now.ToShortTimeString()} from {clientEndPoint}");
-
-            if (msg.Contains(Commands.JOIN_CMD))
+            try
             {
-                if (!_isMaxCount)
-                    AddMember(clientEndPoint, msg);
-                else
+                byte[] data = server.Receive(ref clientEndPoint);
+
+                string msg = Encoding.UTF8.GetString(data);
+
+                Console.WriteLine($"Got : {msg} at {DateTime.Now.ToShortTimeString()} from {clientEndPoint}");
+
+                if (msg.Contains(Commands.JOIN_CMD))
                 {
-                    byte[] refusal = Encoding.UTF8.GetBytes("Chat already have max count");
-                    server.SendAsync(refusal, refusal.Length, clientEndPoint);
+                    if (!_isMaxCount)
+                        AddMember(clientEndPoint, msg);
+                    else
+                    {
+                        byte[] refusal = Encoding.UTF8.GetBytes("Chat already have max count");
+                        server.SendAsync(refusal, refusal.Length, clientEndPoint);
+                    }
                 }
-            }
-            else if (msg == Commands.LEAVE_CMD)
-            {
-                Commands.RemoveMemberFromChat(clientEndPoint);
-                string login = new string(msg.Except(Commands.LEAVE_CMD).ToArray());
+                else if (msg == Commands.LEAVE_CMD)
+                {
+                    Commands.RemoveMemberFromChat(clientEndPoint);
+                    string login = new string(msg.Except(Commands.LEAVE_CMD).ToArray());
 
-                roomDB.Clients.FirstOrDefault(c => c.Login == login).IPEndPoint = "Out of net"; 
-            }
-            else if (msg.Contains(Commands.PRIVATE_CMD))
-            {
-                IPEndPoint ip = GetIp(msg);
-                byte[] prChat = Encoding.UTF8.GetBytes(Commands.NEW_MSG_CMD + GetLogin(clientEndPoint));
-                server.SendAsync(prChat, prChat.Length, ip);
+                    roomDB.Clients.FirstOrDefault(c => c.Login == login).IPEndPoint = "Out of net";
+                }
+                else if (msg.Contains(Commands.PRIVATE_CMD))
+                {
+                    IPEndPoint ip = GetIp(msg);
+                    byte[] prChat = Encoding.UTF8.GetBytes(Commands.NEW_MSG_CMD + GetLogin(clientEndPoint));
+                    server.SendAsync(prChat, prChat.Length, ip);
 
-                byte[] start = Encoding.UTF8.GetBytes(Commands.OPEN_SENT_CHAT_CMD + ip.ToString());
-                server.SendAsync(start, start.Length, clientEndPoint);
+                    //byte[] start = Encoding.UTF8.GetBytes(Commands.OPEN_SENT_CHAT_CMD + ip.ToString());
+                    //server.SendAsync(start, start.Length, clientEndPoint);
+                }
+                else
+                    SendToAllMembersLoginOfNewMember(data);
             }
-            else
-                SendToAllMembersLoginOfNewMember(data);
+
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
         }
     }
 

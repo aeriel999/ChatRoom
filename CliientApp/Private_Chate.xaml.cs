@@ -18,6 +18,9 @@ using System.Windows.Shapes;
 using System.IO;
 using System.Collections.ObjectModel;
 using Command_And_Members;
+using Azure;
+using Azure.Core;
+using System.Diagnostics;
 
 namespace CliientApp
 {
@@ -29,56 +32,114 @@ namespace CliientApp
     {
         private IPEndPoint point = null;
         private TcpClient client = null;
+        private TcpListener listener = null;
         private NetworkStream ns = null;
         private StreamWriter sw = null;
         private StreamReader sr = null;
         private ObservableCollection<MessegeInfo> _privateMesseges = new ObservableCollection<MessegeInfo>();
         private ViewModel model = null;
         private ChatRoomDB roomDB = new ChatRoomDB();
-        public Private_Chate(string sendLogin, string login, IPEndPoint endPoint)
+
+        public Private_Chate(string login, string sendLogin, bool isRequest)
         {
             InitializeComponent();
 
-            this.DataContext = _privateMesseges;
+            this.DataContext = this;
 
             Login = login;
 
             SendLogin = sendLogin;
+            IsRequest = isRequest;
 
             model = new ViewModel();
 
-            //point = endPoint;
+            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
 
             //client = new TcpClient();
 
-            //client.Connect(point);
+                //client.Connect(point);
 
-            //ns = client.GetStream();
+                //ns = client.GetStream();
+        }
 
-            //Listen();
-
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (!IsRequest)
+            {
+                await ConnectAsync();
+            }
         }
 
         public string Login { get; set; }
         public string SendLogin { get; set; }
+        public bool IsRequest { get; set; }
+        public string Conection { get; set; }
 
-        private void GetIp()
+        private void SendConnect()
         {
-            string a = roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint;
-            string b = roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint;
+            listener = new TcpListener(point);
+            listener.Start(10);
+            try
+            {
+                _privateMesseges.Add(new MessegeInfo("Waiting for conection"));
 
-            MessageBox.Show(a + " - " + b);
+                client = listener.AcceptTcpClient();
+
+                while (client.Connected)
+                {
+                    _privateMesseges.Add(new MessegeInfo("Connected!"));
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("SendConnect   " + ex.Message);
+            }
 
         }
 
+        private Task ConnectAsync()
+        {
+            return Task.Run(() =>
+            {
+                listener = new TcpListener(point);
+
+                try
+                {
+                    listener.Start();
+
+                    Wait("Waiting for conection");
+
+                    client = listener.AcceptTcpClient();
+
+                    while (client.Connected)
+                    {
+                        Wait("Connected!");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            });
+        }
+
+        private void Wait(string msg) 
+        {
+            Application.Current.Dispatcher.Invoke(new Action(() =>
+            {
+                Conection = msg;
+            }));
+
+        }
+
+        //private IPEndPoint GetIp(string login)
+        //{
+        //    return IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
+        //}
+
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-            GetIp();
-            //IPEndPoint a = Commands.GetIp(Login);
-            //IPEndPoint b = Commands.GetIp(SendLogin);
-
-            //MessageBox.Show(a.ToString() + " - " + b.ToString());
-
+           
             //try
             //{
             //    while (true)
@@ -88,7 +149,7 @@ namespace CliientApp
             //        sw = new StreamWriter(ns);
             //        sw.WriteLine(message);
 
-            //        sw.Flush(); 
+            //        sw.Flush();
             //    }
             //}
             //catch (Exception ex)

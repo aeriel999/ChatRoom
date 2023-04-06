@@ -13,7 +13,9 @@
         Background="{DynamicResource MaterialDesignPaper}"
         FontFamily="{DynamicResource MaterialDesignFont}"
         mc:Ignorable="d"
-        Title="Private_Chate" Height="450" Width="400">
+        Title="Private_Chate" Height="450" Width="400" Loaded="Window_Loaded">
+
+    <!---->
     <Grid>
         <DockPanel>
             <Grid DockPanel.Dock="Top">
@@ -21,13 +23,21 @@
                     <ColumnDefinition Width="4*"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Foreground="AliceBlue" FontWeight="Bold" FontSize="15" TextAlignment="Left" Margin="5">
-                    Private chat with member: <Run Foreground="Aqua" Text="{Binding Login}"/></TextBlock>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" Grid.Column="0" Foreground="AliceBlue" FontWeight="Bold" FontSize="15" TextAlignment="Left" Margin="5">
+                    Private chat with member: <Run Foreground="Aqua" Text="{Binding SendLogin}"/></TextBlock>
 
-                <Button Foreground="AliceBlue"  Grid.Column="1" 
+                <Button Foreground="AliceBlue"  Grid.Column="1"  Grid.Row="0"
                         Style="{StaticResource MaterialDesignFlatButton}"
                         ToolTip="MaterialDesignFlatButton">Exit
                 </Button>
+                <TextBlock Grid.Row="1" Grid.Column="0" Foreground="AliceBlue" FontWeight="Bold" FontSize="15" TextAlignment="Left" Margin="5"
+                          >
+                <Run Foreground="Aqua" Text="{Binding Conection}"/>
+                </TextBlock>
 
             </Grid>
             <DockPanel DockPanel.Dock="Top">
