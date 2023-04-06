@@ -21,6 +21,7 @@ using Command_And_Members;
 using Azure;
 using Azure.Core;
 using System.Diagnostics;
+using System.Windows.Interop;
 
 namespace CliientApp
 {
@@ -51,24 +52,17 @@ namespace CliientApp
 
             IsRequest = isRequest;
 
-            SetChatStatus("Starting...");
-
+            Conection = "Waiting for conection...";
         }
-
-        public string Login { get; set; }
-        public string SendLogin { get; set; }
-        public bool IsRequest { get; set; }
-        public string Conection { get; set; }
-        public IEnumerable<MessegeInfo> Messeges => _privateMesseges;
-
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
-            //if (!IsRequest)
-            //{
-            //    await SendConnectAsync();
-            //}
-            //else
-            //    await GetConnectAsync();
+            if (!IsRequest)
+                await SendConnectAsync();
+
+            else
+                await GetConnectAsync();
+
+            Listen();
         }
 
         private Task SendConnectAsync()
@@ -83,22 +77,9 @@ namespace CliientApp
                 {
                     listener.Start();
 
-                    SetChatStatus("Waiting for conection...");
-
                     client = listener.AcceptTcpClient();
 
-                    SetChatStatus("Connected!");
-
-                    while (client.Connected)
-                    {
-                        ns = client.GetStream();
-
-                        sr = new StreamReader(ns);
-
-                        string response = sr.ReadLine();
-
-                        AddMsg(response);
-                    }
+                    //Conection = "Connected!";
 
                 }
                 catch (Exception ex)
@@ -119,23 +100,9 @@ namespace CliientApp
             {
                 try
                 {
-                    SetChatStatus("Waiting for conection...");
-
                     client.ConnectAsync(point);
 
-                    SetChatStatus("Connected!");
-
-                    while (client.Connected)
-                    {
-                        ns = client.GetStream();
-
-                        sr = new StreamReader(ns);
-
-                        string response = sr.ReadLine();
-
-                        AddMsg(response);
-                    }
-
+                    //Conection = "Connected!";
                 }
                 catch (Exception ex)
                 {
@@ -144,28 +111,23 @@ namespace CliientApp
             });
         }
 
-        private void SetChatStatus(string msg)
-        {
-            Application.Current.Dispatcher.Invoke(new Action(() =>
-            {
-                Conection = msg;
-            }));
-
-        }
+        public string Login { get; set; }
+        public string SendLogin { get; set; }
+        public bool IsRequest { get; set; }
+        public string Conection { get; set; }
+        public IEnumerable<MessegeInfo> Messeges => _privateMesseges;
 
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-
             try
             {
                 string message = msgTB.Text;
+                _privateMesseges.Add(new MessegeInfo($"You: {message}"));
 
                 sw = new StreamWriter(ns);
                 sw.WriteLine(message);
 
                 sw.Flush();
-
-
             }
             catch (Exception ex)
             {
@@ -182,7 +144,7 @@ namespace CliientApp
 
         private async void Listen()
         {
-            SetChatStatus("Connected!");
+            Conection = "Connected!";
 
             try
             {
@@ -194,19 +156,13 @@ namespace CliientApp
 
                     string response = await sr.ReadLineAsync();
 
-                    AddMsg(response);
+                    _privateMesseges.Add(new MessegeInfo($"{SendLogin}: {response}"));
                 }
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
-        }
-
-        private void AddMsg(string msg)
-        {
-            _privateMesseges.Add(new MessegeInfo($"{SendLogin}: {msg}"));
-
         }
 
         private void SendConnect()
@@ -219,11 +175,7 @@ namespace CliientApp
             {
                 listener.Start();
 
-                SetChatStatus("Waiting for conection...");
-
                 client = listener.AcceptTcpClient();
-
-                Listen();
 
             }
             catch (Exception ex)
@@ -240,8 +192,6 @@ namespace CliientApp
 
             try
             {
-                SetChatStatus("Waiting for conection...");
-
                 client.ConnectAsync(point);
 
                 Listen();
