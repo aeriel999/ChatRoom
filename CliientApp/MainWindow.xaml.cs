@@ -180,9 +180,9 @@ namespace CliientApp
                     if (!_isRquest)
                     {
                         SendMsg(Commands.PRIVATE_CMD + item.Login);
-
-                        _privateChateLogin = item.Login;
                     }
+
+                    _privateChateLogin = item.Login;
 
                     item.IsSelected = false;
                 }

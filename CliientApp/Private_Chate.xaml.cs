@@ -53,7 +53,6 @@ namespace CliientApp
 
             model = new ViewModel();
 
-            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
 
             //client = new TcpClient();
 
@@ -66,8 +65,11 @@ namespace CliientApp
         {
             if (!IsRequest)
             {
-                await ConnectAsync();
+                await SendConnectAsync();
             }
+            else
+                await GetConnectAsync();
+
         }
 
         public string Login { get; set; }
@@ -75,30 +77,32 @@ namespace CliientApp
         public bool IsRequest { get; set; }
         public string Conection { get; set; }
 
-        private void SendConnect()
+        //private void SendConnect()
+        //{
+        //    listener = new TcpListener(point);
+        //    listener.Start(10);
+        //    try
+        //    {
+        //        _privateMesseges.Add(new MessegeInfo("Waiting for conection"));
+
+        //        client = listener.AcceptTcpClient();
+
+        //        while (client.Connected)
+        //        {
+        //            _privateMesseges.Add(new MessegeInfo("Connected!"));
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        MessageBox.Show("SendConnect   " + ex.Message);
+        //    }
+
+        //}
+
+        private Task SendConnectAsync()
         {
-            listener = new TcpListener(point);
-            listener.Start(10);
-            try
-            {
-                _privateMesseges.Add(new MessegeInfo("Waiting for conection"));
+            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
 
-                client = listener.AcceptTcpClient();
-
-                while (client.Connected)
-                {
-                    _privateMesseges.Add(new MessegeInfo("Connected!"));
-                }
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("SendConnect   " + ex.Message);
-            }
-
-        }
-
-        private Task ConnectAsync()
-        {
             return Task.Run(() =>
             {
                 listener = new TcpListener(point);
@@ -107,7 +111,7 @@ namespace CliientApp
                 {
                     listener.Start();
 
-                    Wait("Waiting for conection");
+                    Wait("Waiting for conection   " + point.ToString());
 
                     client = listener.AcceptTcpClient();
 
@@ -115,6 +119,27 @@ namespace CliientApp
                     {
                         Wait("Connected!");
                     }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(ex.Message);
+                }
+            });
+        }
+
+        private Task GetConnectAsync()
+        {
+            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint);
+
+            client = new TcpClient();
+
+            return Task.Run(() =>
+            {
+                try
+                {
+                    client.Connect(point);
+
+                   // ns = client.GetStream();
                 }
                 catch (Exception ex)
                 {
