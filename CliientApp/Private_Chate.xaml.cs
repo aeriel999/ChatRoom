@@ -37,7 +37,6 @@ namespace CliientApp
         private StreamWriter sw = null;
         private StreamReader sr = null;
         private ObservableCollection<MessegeInfo> _privateMesseges = new ObservableCollection<MessegeInfo>();
-        private ViewModel model = null;
         private ChatRoomDB roomDB = new ChatRoomDB();
 
         public Private_Chate(string login, string sendLogin, bool isRequest)
@@ -49,26 +48,10 @@ namespace CliientApp
             Login = login;
 
             SendLogin = sendLogin;
+
             IsRequest = isRequest;
 
-            model = new ViewModel();
-
-
-            //client = new TcpClient();
-
-                //client.Connect(point);
-
-                //ns = client.GetStream();
-        }
-
-        private async void Window_Loaded(object sender, RoutedEventArgs e)
-        {
-            if (!IsRequest)
-            {
-                await SendConnectAsync();
-            }
-            else
-                await GetConnectAsync();
+            SetChatStatus("Starting...");
 
         }
 
@@ -76,28 +59,17 @@ namespace CliientApp
         public string SendLogin { get; set; }
         public bool IsRequest { get; set; }
         public string Conection { get; set; }
+        public IEnumerable<MessegeInfo> Messeges => _privateMesseges;
 
-        //private void SendConnect()
-        //{
-        //    listener = new TcpListener(point);
-        //    listener.Start(10);
-        //    try
-        //    {
-        //        _privateMesseges.Add(new MessegeInfo("Waiting for conection"));
-
-        //        client = listener.AcceptTcpClient();
-
-        //        while (client.Connected)
-        //        {
-        //            _privateMesseges.Add(new MessegeInfo("Connected!"));
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        MessageBox.Show("SendConnect   " + ex.Message);
-        //    }
-
-        //}
+        private async void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            //if (!IsRequest)
+            //{
+            //    await SendConnectAsync();
+            //}
+            //else
+            //    await GetConnectAsync();
+        }
 
         private Task SendConnectAsync()
         {
@@ -111,19 +83,29 @@ namespace CliientApp
                 {
                     listener.Start();
 
-                    Wait("Waiting for conection   " + point.ToString());
+                    SetChatStatus("Waiting for conection...");
 
                     client = listener.AcceptTcpClient();
 
+                    SetChatStatus("Connected!");
+
                     while (client.Connected)
                     {
-                        Wait("Connected!");
+                        ns = client.GetStream();
+
+                        sr = new StreamReader(ns);
+
+                        string response = sr.ReadLine();
+
+                        AddMsg(response);
                     }
+
                 }
                 catch (Exception ex)
                 {
                     MessageBox.Show(ex.Message);
                 }
+
             });
         }
 
@@ -137,9 +119,23 @@ namespace CliientApp
             {
                 try
                 {
-                    client.Connect(point);
+                    SetChatStatus("Waiting for conection...");
 
-                   // ns = client.GetStream();
+                    client.ConnectAsync(point);
+
+                    SetChatStatus("Connected!");
+
+                    while (client.Connected)
+                    {
+                        ns = client.GetStream();
+
+                        sr = new StreamReader(ns);
+
+                        string response = sr.ReadLine();
+
+                        AddMsg(response);
+                    }
+
                 }
                 catch (Exception ex)
                 {
@@ -148,7 +144,7 @@ namespace CliientApp
             });
         }
 
-        private void Wait(string msg) 
+        private void SetChatStatus(string msg)
         {
             Application.Current.Dispatcher.Invoke(new Action(() =>
             {
@@ -157,48 +153,113 @@ namespace CliientApp
 
         }
 
-        //private IPEndPoint GetIp(string login)
-        //{
-        //    return IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
-        //}
-
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
-           
-            //try
-            //{
-            //    while (true)
-            //    {
-            //        string message = msgTB.Text;
 
-            //        sw = new StreamWriter(ns);
-            //        sw.WriteLine(message);
+            try
+            {
+                string message = msgTB.Text;
 
-            //        sw.Flush();
-            //    }
-            //}
-            //catch (Exception ex)
-            //{
-            //    Console.WriteLine(ex.Message);
-            //}
+                sw = new StreamWriter(ns);
+                sw.WriteLine(message);
+
+                sw.Flush();
+
+
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+            }
             //finally
             //{
             //    sw.Close();
             //    sr.Close();
-            //    ns.Close();
+            //    //ns.Close();
             //    client.Close();
             //}
         }
 
-        private void Listen()
+        private async void Listen()
         {
-            while (true)
-            {
-                sr = new StreamReader(ns);
-                string response = sr.ReadLine();
+            SetChatStatus("Connected!");
 
-                _privateMesseges.Add(new MessegeInfo(response));
+            try
+            {
+                while (client.Connected)
+                {
+                    ns = client.GetStream();
+
+                    sr = new StreamReader(ns);
+
+                    string response = await sr.ReadLineAsync();
+
+                    AddMsg(response);
+                }
             }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void AddMsg(string msg)
+        {
+            _privateMesseges.Add(new MessegeInfo($"{SendLogin}: {msg}"));
+
+        }
+
+        private void SendConnect()
+        {
+            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
+
+            listener = new TcpListener(point);
+
+            try
+            {
+                listener.Start();
+
+                SetChatStatus("Waiting for conection...");
+
+                client = listener.AcceptTcpClient();
+
+                Listen();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void GetConnect()
+        {
+            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint);
+
+            client = new TcpClient();
+
+            try
+            {
+                SetChatStatus("Waiting for conection...");
+
+                client.ConnectAsync(point);
+
+                Listen();
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+            private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            if (!IsRequest)
+            {
+                    SendConnect();
+            }
+            else
+                GetConnect();
         }
     }
 }

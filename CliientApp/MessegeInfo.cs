@@ -1,7 +1,9 @@
-﻿using System;
+﻿using PropertyChanged;
+using System;
 
 namespace CliientApp
 {
+    [AddINotifyPropertyChangedInterface]
     public class MessegeInfo
     {
         public string Messege { get; set; }

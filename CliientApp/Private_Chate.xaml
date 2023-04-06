@@ -39,6 +39,8 @@
                 <Run Foreground="Aqua" Text="{Binding Conection}"/>
                 </TextBlock>
 
+                <Button Grid.Row="1" Grid.Column="1" Click="Button_Click">Connect</Button>
+                
             </Grid>
             <DockPanel DockPanel.Dock="Top">
                 <Label VerticalAlignment="Bottom" FontWeight="Bold" FontSize="16">Messege:</Label>
@@ -49,7 +51,7 @@
             </DockPanel>
             <TextBlock DockPanel.Dock="Top" TextAlignment="Center" FontWeight="Bold" FontSize="20" Foreground="White" Margin="5">Chat</TextBlock>
 
-            <ListBox ItemsSource="{Binding}" Background="#fff1ff" Foreground="Black"></ListBox>
+            <ListBox ItemsSource="{Binding Messeges}" Background="#fff1ff" Foreground="Black"></ListBox>
         </DockPanel>
     </Grid>
 </Window>

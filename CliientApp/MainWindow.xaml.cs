@@ -114,7 +114,7 @@ namespace CliientApp
         {
             try
             {
-                while (!_isPrivateChat)
+                while (/*!_isPrivateChat*/true)
                 {
                     var result = await _client.ReceiveAsync();
 
@@ -188,9 +188,9 @@ namespace CliientApp
                 }
             }
 
-           // Disconnect();
-
             Private_Chate chate = new Private_Chate(_login, _privateChateLogin, _isRquest);
+
+            Disconnect();
 
             chate.ShowDialog();
 
