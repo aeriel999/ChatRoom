@@ -1,9 +1,6 @@
 ﻿using Command_And_Members;
 using MaterialDesignThemes.Wpf.Converters;
-using PropertyChanged;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Configuration;
 using System.Drawing;
 using System.Linq;
@@ -36,7 +33,7 @@ namespace CliientApp
         private string _login;
         private string _privateChateLogin;
         private bool _isRquest;
-        private bool _isPrivateChat;
+        private bool _leavePublicChat;
 
         public MainWindow()
         {
@@ -58,17 +55,6 @@ namespace CliientApp
             SendBtn.IsEnabled = false;
 
             _isRquest = false;
-
-            _isPrivateChat = false;
-        }
-
-        private void Connect()
-        {
-            _client = new UdpClient();
-        }
-        private void Disconnect()
-        {
-            _client.Close();
         }
 
         private async void SendBtnClick(object sender, RoutedEventArgs e)
@@ -79,9 +65,12 @@ namespace CliientApp
 
         private void JoinBtnClick(object sender, RoutedEventArgs e)
         {
-            Connect();
-            string msg = Commands.JOIN_CMD + _login;
-            SendMsg(msg);
+            _client = new UdpClient();
+
+            SendMsg(Commands.JOIN_CMD + _login);
+
+            _leavePublicChat = false;
+
             Listen();
 
             LeaveBtn.IsEnabled = true;
@@ -93,7 +82,7 @@ namespace CliientApp
         {
             try
             {
-                string login = new string(msg.Except(Commands.ADD_CMD).ToArray());
+                string login = msg.Substring(Commands.JOIN_CMD.Length);
 
                 model.AddMember(new MemberInfo(login));
             }
@@ -114,31 +103,45 @@ namespace CliientApp
         {
             try
             {
-                while (!_isPrivateChat)
+                while (!_leavePublicChat)
                 {
                     var result = await _client.ReceiveAsync();
 
                     string msg = Encoding.UTF8.GetString(result.Buffer);
 
-                    if (msg.Contains(Commands.ADD_CMD))
+                    if (msg.Contains(Commands.JOIN_CMD))
                         AddNewMember(msg);
-                    else if (msg.Contains(Commands.NEW_MSG_CMD))
+                    else if (msg.Contains(Commands.PRIVATE_CMD))
                         NotifyAboutPrivateChat(msg);
-                    //else if (msg.Contains(Commands.OPEN_SENT_CHAT_CMD))
-                    //    StartPrivateChate(msg);
+                    else if (msg.Contains(Commands.LEAVE_CMD))
+                        DeleteMemberFromChat(msg);
                     else
-                        model.Add(new MessegeInfo(msg));
+                        model.AddMsg(new MessegeInfo(msg));
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Listen MW  " + ex.Message);
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void DeleteMemberFromChat(string msg)
+        {
+            try
+            {
+                string login = new string(msg.Except(Commands.LEAVE_CMD).ToArray());
+
+                model.DeleteMember(login);
+            }
+            catch (Exception)
+            {
+                MessageBox.Show("One of the members leave chat");
             }
         }
 
         private void NotifyAboutPrivateChat(string msg)
         {
-            string login = new string(msg.Except(Commands.NEW_MSG_CMD).ToArray());
+            string login = msg.Substring(Commands.PRIVATE_CMD.Length);
 
             model.NotifyAboutNewChat(login);
 
@@ -147,11 +150,15 @@ namespace CliientApp
 
         private void LeaveBtnClick(object sender, RoutedEventArgs e)
         {
-            SendMsg(Commands.LEAVE_CMD);
+            SendMsg(Commands.LEAVE_CMD + _login);
 
-            Disconnect();
+            _leavePublicChat = true;
+
+            model.DeleteAllMembers();
 
             JoinBtn.IsEnabled = true;
+            LeaveBtn.IsEnabled = false;
+            SendBtn.IsEnabled = false;
         }
 
         private void LoginBtnClick(object sender, RoutedEventArgs e)
@@ -166,13 +173,12 @@ namespace CliientApp
                 LoginBtn.IsEnabled = false;
                 _login = loginForm.Login!;
                 loginTB.Text = _login;
-                // LoginLB.Content = _login;
             }
         }
 
         private void OpenPrivateChateBtnClick(object sender, RoutedEventArgs e)
         {
-            _isPrivateChat = true;
+            _leavePublicChat = true;
 
             foreach (var item in model.Members)
             {
@@ -186,6 +192,8 @@ namespace CliientApp
                     _privateChateLogin = item.Login;
 
                     item.IsSelected = false;
+
+                    item.Post = "";
                 }
             }
 
@@ -193,83 +201,9 @@ namespace CliientApp
 
             chate.ShowDialog();
 
-            _isPrivateChat = false;
+            _leavePublicChat = false;
 
             Listen();
-        }
-
-        //private void StartPrivateChate(string msg)
-        //{
-        //    string ip = new string(msg.Except(Commands.OPEN_SENT_CHAT_CMD).ToArray());
-
-        //    Disconnect();
-
-        //    Private_Chate chate = new Private_Chate(_login, _privateChateLogin, IPEndPoint.Parse(ip));
-
-        //    chate.ShowDialog();
-        //}
-    }
-
-    public class ViewModel
-    {
-        private ObservableCollection<MessegeInfo> _messeges = new ObservableCollection<MessegeInfo>();
-        private ObservableCollection<MemberInfo> _members = new ObservableCollection<MemberInfo>();
-
-        public IEnumerable<MessegeInfo> Messeges => _messeges;
-        public void Add(MessegeInfo info)
-        {
-            _messeges.Add(info);
-        }
-
-        public IEnumerable<MemberInfo> Members => _members;
-        public void AddMember(MemberInfo info)
-        {
-            _members.Add(info);
-        }
-
-        public void NotifyAboutNewChat(string login)
-        {
-            foreach (var m in _members)
-            {
-                if (m.Login == login)
-                {
-                    m.Post = "You have a new post";
-                    m.IsRequest = true;
-                }
-            }
-        }
-
-        public MemberInfo GetMember(string login)
-        {
-            foreach (var m in _members)
-            {
-                if (m.Login == login)
-                    return m;
-            }
-
-            return new MemberInfo();
-        }
-    }
-
-    [AddINotifyPropertyChangedInterface]
-    public class MemberInfo
-    {
-        public string Login { get; set; }
-        public string Post { get; set; }
-        public bool IsSelected { get; set; }
-        public bool IsRequest { get; set; }
-        public string Initial { get; }
-        public IPEndPoint Ip { get; set; }
-
-        public MemberInfo() { }
-
-        public MemberInfo(string login)
-        {
-            Login = login;
-
-            Initial = Login.ToCharArray().First().ToString();
-
-            IsRequest = false;
         }
     }
 }

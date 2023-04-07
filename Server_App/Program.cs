@@ -1,6 +1,8 @@
 ﻿using CliientApp;
 using Command_And_Members;
+using System.Diagnostics.Metrics;
 using System.Drawing;
+using System.Dynamic;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -19,7 +21,6 @@ public class ChatServer
     private UdpClient server = new UdpClient(PORT);
     private IPEndPoint clientEndPoint = null;
     private const int MAX_OF_MEMBERS = 3;
-    private bool _isMaxCount = false;
     private ChatRoomDB roomDB = new ChatRoomDB();
 
     public void Start()
@@ -35,40 +36,26 @@ public class ChatServer
                 Console.WriteLine($"Got : {msg} at {DateTime.Now.ToShortTimeString()} from {clientEndPoint}");
 
                 if (msg.Contains(Commands.JOIN_CMD))
-                {
-                    if (!_isMaxCount)
-                        AddMember(clientEndPoint, msg);
-                    else
-                    {
-                        byte[] refusal = Encoding.UTF8.GetBytes("Chat already have max count");
-                        server.SendAsync(refusal, refusal.Length, clientEndPoint);
-                    }
-                }
-                else if (msg == Commands.LEAVE_CMD)
-                {
-                    Commands.RemoveMemberFromChat(clientEndPoint);
-                    string login = new string(msg.Except(Commands.LEAVE_CMD).ToArray());
-
-                    roomDB.Clients.FirstOrDefault(c => c.Login == login).IPEndPoint = "Out of net";
-                }
+                    AddMember(clientEndPoint, msg);
+                else if (msg.Contains(Commands.LEAVE_CMD))
+                    DeleteMember(msg, clientEndPoint);
                 else if (msg.Contains(Commands.PRIVATE_CMD))
-                {
-                    IPEndPoint ip = GetIp(msg);
-                    byte[] prChat = Encoding.UTF8.GetBytes(Commands.NEW_MSG_CMD + GetLogin(clientEndPoint));
-                    server.SendAsync(prChat, prChat.Length, ip);
-
-                    //byte[] start = Encoding.UTF8.GetBytes(Commands.OPEN_SENT_CHAT_CMD + ip.ToString());
-                    //server.SendAsync(start, start.Length, clientEndPoint);
-                }
+                    SendInfoForPrivateChate(msg);
                 else
-                    SendToAllMembersLoginOfNewMember(data);
+                    SendMsgToAllMembersMsg(data);
             }
-
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
             }
         }
+    }
+
+    private void SendInfoForPrivateChate(string msg)
+    {
+        IPEndPoint ip = GetIp(msg);
+        byte[] prChat = Encoding.UTF8.GetBytes(Commands.PRIVATE_CMD + GetLogin(ip));
+        server.SendAsync(prChat, prChat.Length, ip);
     }
 
     private string GetLogin(IPEndPoint member)
@@ -84,23 +71,57 @@ public class ChatServer
         return null;
     }
 
+    private void DeleteMember(string msg, IPEndPoint member)
+    {
+        Commands.RemoveMemberFromChat(member);
+
+        string login = msg.Substring(Commands.LEAVE_CMD.Length);
+
+        SendMsgToAllMembersMsg(Encoding.UTF8.GetBytes(msg));
+
+        AddOrEditIpInDataBase(login, "Out of net");
+    }
+
     private void AddMember(IPEndPoint member, string msg)
     {
-        SendToAllMembersLoginOfNewMember(GetILoginForListMembers(msg));
-        SendToNewMemberInfoAboutMembers(member);
-        string login = new string(msg.Except(Commands.JOIN_CMD).ToArray());
-        Commands.AddNewMemberToChat(member, login);
-        roomDB.Clients.FirstOrDefault(c => c.Login == login).IPEndPoint = member.ToString();
-        roomDB.SaveChanges();
+        if (!IsMaxCountOfMembers())
+        {
+            SendMsgToAllMembersMsg(Encoding.UTF8.GetBytes(msg));
 
+            SendToNewMemberInfoAboutMembers(member);
+
+            string login = msg.Substring(Commands.JOIN_CMD.Length);
+
+            Commands.AddNewMemberToChat(member, login);
+
+            AddOrEditIpInDataBase(login, member.ToString());
+        }
+        else
+        {
+            byte[] refusal = Encoding.UTF8.GetBytes("You cant connected. Chat already have max count.");
+            server.SendAsync(refusal, refusal.Length, member);
+        }
+        
         if (IsMaxCountOfMembers())
         {
-            SendToAllMembersLoginOfNewMember(Encoding.UTF8.GetBytes("Chat already have max count"));
-            _isMaxCount = true;
+            SendMsgToAllMembersMsg(Encoding.UTF8.GetBytes("Chat already have max count"));
         }
     }
 
-    private void SendToAllMembersLoginOfNewMember(byte[] data)
+    private void AddOrEditIpInDataBase(string login, string ipEnd)
+    {
+        try
+        {
+            roomDB.Clients.FirstOrDefault(c => c.Login == login).IPEndPoint = ipEnd;
+            roomDB.SaveChanges();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex.Message);
+        }
+    }
+
+    private void SendMsgToAllMembersMsg(byte[] data)
     {
         foreach (var m in Commands.Members)
         {
@@ -116,18 +137,11 @@ public class ChatServer
             return false;
     }
 
-    private byte[] GetILoginForListMembers(string msg)
-    {
-        string login = new string(msg.Except(Commands.JOIN_CMD).ToArray());
-
-        return Encoding.UTF8.GetBytes(Commands.ADD_CMD + login);
-    }
-
     private void SendToNewMemberInfoAboutMembers(IPEndPoint ip)
     {
         foreach (var m in Commands.Members)
         {
-            byte[] data = GetILoginForListMembers(m.Item2);
+            byte[] data = Encoding.UTF8.GetBytes(Commands.JOIN_CMD + m.Item2);
 
             server.SendAsync(data, data.Length, ip);
         }
@@ -135,7 +149,8 @@ public class ChatServer
 
     private IPEndPoint GetIp(string msg)
     {
-        string login = new string(msg.Except(Commands.PRIVATE_CMD).ToArray());
+       // string login = new string(msg.Except(Commands.PRIVATE_CMD).ToArray());
+        string login = msg.Substring(Commands.PRIVATE_CMD.Length);
 
         foreach (var m in Commands.Members)
         {
