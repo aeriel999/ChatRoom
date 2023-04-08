@@ -84,13 +84,20 @@ public class ChatServer
 
     private void AddMember(IPEndPoint member, string msg)
     {
+        string login = msg.Substring(Commands.JOIN_CMD.Length);
+
+        if (Commands.IsExist(login))
+        {
+            byte[] refusal = Encoding.UTF8.GetBytes(Commands.EXIST_CMD);
+            server.SendAsync(refusal, refusal.Length, member);
+            return;
+        }
+
         if (!IsMaxCountOfMembers())
         {
             SendMsgToAllMembersMsg(Encoding.UTF8.GetBytes(msg));
 
             SendToNewMemberInfoAboutMembers(member);
-
-            string login = msg.Substring(Commands.JOIN_CMD.Length);
 
             Commands.AddNewMemberToChat(member, login);
 

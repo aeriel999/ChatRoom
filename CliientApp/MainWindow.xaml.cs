@@ -3,6 +3,7 @@ using MaterialDesignThemes.Wpf.Converters;
 using System;
 using System.Configuration;
 using System.Drawing;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -116,14 +117,35 @@ namespace CliientApp
                         NotifyAboutPrivateChat(msg);
                     else if (msg.Contains(Commands.LEAVE_CMD))
                         DeleteMemberFromChat(msg);
+                    else if (msg.Contains(Commands.EXIST_CMD))
+                        IfUserIsExist();
                     else
                         model.AddMsg(new MessegeInfo(msg));
                 }
+            }
+            catch (SocketException)
+            { 
+                MessageBox.Show("You are disconect!");
             }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
             }
+        }
+
+        private void IfUserIsExist()
+        {
+            model.AddMsg(new MessegeInfo("You are already sign in in another device!"));
+
+            loginTB.Text = string.Empty;
+
+            LeaveBtn.IsEnabled = false;
+
+            JoinBtn.IsEnabled = false;
+
+            SendBtn.IsEnabled = false;
+
+            LoginBtn.IsEnabled = true;
         }
 
         private void DeleteMemberFromChat(string msg)

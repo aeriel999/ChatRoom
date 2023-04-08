@@ -14,12 +14,25 @@ namespace Command_And_Members
         public static string JOIN_CMD => "<JOIN>";
         public static string LEAVE_CMD = "<LEAVE>";
         public static string PRIVATE_CMD = "<PRIVATE.CHAT>";//start private chat
+        public static string EXIST_CMD = "<EXIST.USER>";//start private chat
         
 
         private static HashSet<(IPEndPoint, string)> _members = new HashSet<(IPEndPoint, string)>();//make identity
 
         public static HashSet<(IPEndPoint, string)> Members => _members;
 
+        public static bool IsExist(string login)
+        {
+            foreach (var m in _members)
+            {
+                if (m.Item2 == login) 
+                { 
+                    return true;
+                }
+            }
+
+            return false;
+        }
         public static void AddNewMemberToChat(IPEndPoint ip, string login)
         {
             _members.Add((ip, login));
