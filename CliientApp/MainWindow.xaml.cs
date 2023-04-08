@@ -61,6 +61,7 @@ namespace CliientApp
         {
             string msg = _login + " : " + msgTB.Text;
             SendMsg(msg);
+            msgTB.Text = string.Empty;
         }
 
         private void JoinBtnClick(object sender, RoutedEventArgs e)
@@ -203,7 +204,15 @@ namespace CliientApp
 
             _leavePublicChat = false;
 
+            _isRquest = false;
+
             Listen();
+        }
+
+        private void EndBtn_Click(object sender, RoutedEventArgs e)
+        {
+            _client.Close();
+            this.Close();
         }
     }
 }

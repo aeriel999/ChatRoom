@@ -20,6 +20,7 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*"/>
@@ -28,6 +29,7 @@
             <Button Padding="10,5" Margin="5" Grid.Column="2" Grid.Row="1" Click="LeaveBtnClick" Name="LeaveBtn">Leave</Button>
             <Button Padding="10,5" Margin="5" Grid.Column="1" Grid.Row="1" Click="JoinBtnClick"  Name="JoinBtn">Join</Button>
             <Button Padding="10,5" Margin="5" Grid.Column="0" Grid.Row="1" Click="LoginBtnClick" Name="LoginBtn">Login</Button>
+            <Button Padding="10,5" Margin="5" Grid.Column="3" Grid.Row="1" Click="EndBtn_Click" Name="EndBtn">Exit</Button>
             <TextBlock Grid.Row="0" Grid.Column="1" Name="loginTB" TextAlignment="Center" FontWeight="Bold" 
                        FontSize="20" Foreground="White"></TextBlock>
         </Grid>

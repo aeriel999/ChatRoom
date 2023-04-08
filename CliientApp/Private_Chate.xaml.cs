@@ -53,7 +53,14 @@ namespace CliientApp
             IsRequest = isRequest;
 
             Conection = "Waiting for conection...";
+
         }
+        public string Login { get; set; }
+        public string SendLogin { get; set; }
+        public bool IsRequest { get; set; }
+        public string Conection { get; set; }
+        public IEnumerable<MessegeInfo> Messeges => _privateMesseges;
+
         private async void Window_Loaded(object sender, RoutedEventArgs e)
         {
             if (!IsRequest)
@@ -66,6 +73,11 @@ namespace CliientApp
 
         private Task SendConnectAsync()
         {
+            //if (listener != null)
+            //    listener.Stop();
+            //if (client != null)
+            //    client.Close();
+
             point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
 
             return Task.Run(() =>
@@ -78,12 +90,10 @@ namespace CliientApp
 
                     client = listener.AcceptTcpClient();
 
-                    //Conection = "Connected!";
-
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show(Login + "   SendConnectAsync   " + ex.Message);
                 }
 
             });
@@ -91,6 +101,9 @@ namespace CliientApp
 
         private Task GetConnectAsync()
         {
+            if (client != null)
+                client.Close();
+
             point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint);
 
             client = new TcpClient();
@@ -101,20 +114,13 @@ namespace CliientApp
                 {
                     client.ConnectAsync(point);
 
-                    //Conection = "Connected!";
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show(ex.Message);
+                    MessageBox.Show(Login + "   GetConnectAsync   " + ex.Message);
                 }
             });
         }
-
-        public string Login { get; set; }
-        public string SendLogin { get; set; }
-        public bool IsRequest { get; set; }
-        public string Conection { get; set; }
-        public IEnumerable<MessegeInfo> Messeges => _privateMesseges;
 
         private void SendBtn_Click(object sender, RoutedEventArgs e)
         {
@@ -127,18 +133,13 @@ namespace CliientApp
                 sw.WriteLine(message);
 
                 sw.Flush();
+
+                msgTB.Text = string.Empty;
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
+                Console.WriteLine(Login + "   SendBtn_Click   " + ex.Message);
             }
-            //finally
-            //{
-            //    sw.Close();
-            //    sr.Close();
-            //    //ns.Close();
-            //    client.Close();
-            //}
         }
 
         private async void Listen()
@@ -147,7 +148,7 @@ namespace CliientApp
 
             try
             {
-                do
+                while (client.Connected)
                 {
                     ns = client.GetStream();
 
@@ -156,54 +157,18 @@ namespace CliientApp
                     string response = await sr.ReadLineAsync();
 
                     _privateMesseges.Add(new MessegeInfo($"{SendLogin}: {response}"));
-                } while (client.Connected);
-
-                //if (!IsRequest)
-                //    listener.Stop();
-
-                //client.Close();
-
-                //sr.Close();
-                //sw.Close();
-                //ns.Close();
-
-                //this.Close();
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(ex.Message);
-            }
-        }
-
-        private void SendConnect()
-        {
-            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
-
-            listener = new TcpListener(point);
-
-            try
-            {
-                listener.Start();
-
-                client = listener.AcceptTcpClient();
-
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(ex.Message);
+                MessageBox.Show(Login + "   Listen  " + ex.Message);
             }
         }
 
         private void ExitBtnClick(object sender, RoutedEventArgs e)
         {
-            //if (!IsRequest)
-            //    listener.Stop();
-
-            //client.Close();
-
-            //sr.Close();
-            //sw.Close();
-            //ns.Close();
+            if(!IsRequest)
+                listener.Stop();
 
             this.Close();
         }

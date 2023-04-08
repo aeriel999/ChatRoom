@@ -40,7 +40,7 @@ public class ChatServer
                 else if (msg.Contains(Commands.LEAVE_CMD))
                     DeleteMember(msg, clientEndPoint);
                 else if (msg.Contains(Commands.PRIVATE_CMD))
-                    SendInfoForPrivateChate(msg);
+                    SendInfoForPrivateChate(msg, clientEndPoint);
                 else
                     SendMsgToAllMembersMsg(data);
             }
@@ -51,10 +51,10 @@ public class ChatServer
         }
     }
 
-    private void SendInfoForPrivateChate(string msg)
+    private void SendInfoForPrivateChate(string msg, IPEndPoint sendIp)
     {
         IPEndPoint ip = GetIp(msg);
-        byte[] prChat = Encoding.UTF8.GetBytes(Commands.PRIVATE_CMD + GetLogin(ip));
+        byte[] prChat = Encoding.UTF8.GetBytes(Commands.PRIVATE_CMD + GetLogin(sendIp));
         server.SendAsync(prChat, prChat.Length, ip);
     }
 
