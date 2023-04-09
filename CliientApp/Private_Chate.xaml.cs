@@ -31,14 +31,9 @@ namespace CliientApp
     [AddINotifyPropertyChangedInterface]
     public partial class Private_Chate : Window
     {
-        private IPEndPoint point = null;
-        private TcpClient client = null;
-        private TcpListener listener = null;
-        private NetworkStream ns = null;
-        private StreamWriter sw = null;
-        private StreamReader sr = null;
+        private TcpClient client = null; 
         private ObservableCollection<MessegeInfo> _privateMesseges = new ObservableCollection<MessegeInfo>();
-        private ChatRoomDB roomDB = new ChatRoomDB();
+        private ChatRoomDbContext roomDB = new ChatRoomDbContext(ConfigurationManager.ConnectionStrings["ChatRoomDb"].ConnectionString);
 
         public Private_Chate(string login, string sendLogin, bool isRequest)
         {
@@ -73,22 +68,19 @@ namespace CliientApp
 
         private Task SendConnectAsync()
         {
-            //if (listener != null)
-            //    listener.Stop();
-            //if (client != null)
-            //    client.Close();
-
-            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
+            var point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == Login).IPEndPoint);
 
             return Task.Run(() =>
             {
-                listener = new TcpListener(point);
+               var listener = new TcpListener(point);
 
                 try
                 {
                     listener.Start();
 
                     client = listener.AcceptTcpClient();
+
+                    listener.Stop();
 
                 }
                 catch (Exception ex)
@@ -101,25 +93,22 @@ namespace CliientApp
 
         private Task GetConnectAsync()
         {
-            if (client != null)
-                client.Close();
+            var point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint);
 
-            point = IPEndPoint.Parse(roomDB.Clients.FirstOrDefault(c => c.Login == SendLogin).IPEndPoint);
+             client = new TcpClient();
 
-            client = new TcpClient();
-
-            return Task.Run(() =>
-            {
-                try
+                return Task.Run(() =>
                 {
-                    client.ConnectAsync(point);
+                    try
+                    {
+                        client.ConnectAsync(point);
 
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(Login + "   GetConnectAsync   " + ex.Message);
-                }
-            });
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show(Login + "   GetConnectAsync   " + ex.Message);
+                    }
+                });
         }
 
         private void SendBtn_Click(object sender, RoutedEventArgs e)
@@ -129,7 +118,10 @@ namespace CliientApp
                 string message = msgTB.Text;
                 _privateMesseges.Add(new MessegeInfo($"You: {message}"));
 
-                sw = new StreamWriter(ns);
+               var ns = client.GetStream();
+
+                using var sw = new StreamWriter(ns, leaveOpen:true);
+
                 sw.WriteLine(message);
 
                 sw.Flush();
@@ -150,15 +142,17 @@ namespace CliientApp
             {
                 while (client.Connected)
                 {
-                    ns = client.GetStream();
+                    var ns = client.GetStream();
 
-                    sr = new StreamReader(ns);
 
-                    string response = await sr.ReadLineAsync();
+                    using var sr = new StreamReader(ns, leaveOpen: true);
+
+                    var response = await sr.ReadLineAsync();
 
                     _privateMesseges.Add(new MessegeInfo($"{SendLogin}: {response}"));
                 }
             }
+            catch (IOException) { }
             catch (Exception ex)
             {
                 MessageBox.Show(Login + "   Listen  " + ex.Message);
@@ -167,10 +161,13 @@ namespace CliientApp
 
         private void ExitBtnClick(object sender, RoutedEventArgs e)
         {
-            if(!IsRequest)
-                listener.Stop();
-
             this.Close();
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            roomDB.Dispose();
+           //client?.Close();
         }
     }
 }

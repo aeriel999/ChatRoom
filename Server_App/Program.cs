@@ -1,5 +1,6 @@
 ﻿using CliientApp;
 using Command_And_Members;
+using Microsoft.IdentityModel.Protocols;
 using System.Diagnostics.Metrics;
 using System.Drawing;
 using System.Dynamic;
@@ -9,19 +10,23 @@ using System.Net.Sockets;
 using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Configuration;
+using System.Diagnostics;
 
-ChatServer server = new ChatServer();
+using (ChatServer server = new ChatServer())
+{
+    server.Start();
+}
 
-server.Start();
 
-public class ChatServer
+public class ChatServer : IDisposable
 {
     private const string ADDRESS = "127.0.0.1";
     private const short PORT = 4040;
     private UdpClient server = new UdpClient(PORT);
     private IPEndPoint clientEndPoint = null;
     private const int MAX_OF_MEMBERS = 3;
-    private ChatRoomDB roomDB = new ChatRoomDB();
+    private ChatRoomDbContext roomDB = new ChatRoomDbContext(ConfigurationManager.ConnectionStrings["ChatRoomDb"].ConnectionString);
 
     public void Start()
     {
@@ -166,5 +171,11 @@ public class ChatServer
         }
 
         return null;
+    }
+
+    public void Dispose()
+    {
+        Debug.WriteLine("Disposing");
+        roomDB.Dispose();
     }
 }

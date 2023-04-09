@@ -25,7 +25,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Command_And_Members\Command_And_Members.csproj" />
+    <ProjectReference Include="..\Command_And_Members\ChatRoom.DataAccess.csproj" />
   </ItemGroup>
 
 </Project>

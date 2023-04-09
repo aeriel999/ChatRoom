@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.33424.131
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CliientApp", "CliientApp\CliientApp.csproj", "{CB4EA4B5-E5AF-4452-BB21-420A4C2ECC8B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.ClientApp", "CliientApp\ChatRoom.ClientApp.csproj", "{CB4EA4B5-E5AF-4452-BB21-420A4C2ECC8B}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Server_App", "Server_App\Server_App.csproj", "{73CE4474-30E5-4C2C-9F8F-CEF6417E9292}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.ServerApp", "Server_App\ChatRoom.ServerApp.csproj", "{73CE4474-30E5-4C2C-9F8F-CEF6417E9292}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Command_And_Members", "Command_And_Members\Command_And_Members.csproj", "{5837947D-967E-49C1-8F72-BF60859DDA81}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ChatRoom.DataAccess", "Command_And_Members\ChatRoom.DataAccess.csproj", "{5837947D-967E-49C1-8F72-BF60859DDA81}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

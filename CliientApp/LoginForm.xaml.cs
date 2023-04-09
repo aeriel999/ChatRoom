@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -19,7 +20,7 @@ namespace CliientApp
     /// </summary>
     public partial class LoginForm : Window
     {
-        private ChatRoomDB roomDB = new ChatRoomDB();
+        private ChatRoomDbContext roomDB = new ChatRoomDbContext(ConfigurationManager.ConnectionStrings["ChatRoomDb"].ConnectionString);
         public bool IsLogin { get; set; }
         public string? Login { get; set; }
         public LoginForm()
@@ -86,6 +87,11 @@ namespace CliientApp
                     }
                 }
             }
+        }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            roomDB.Dispose();
         }
     }
 }

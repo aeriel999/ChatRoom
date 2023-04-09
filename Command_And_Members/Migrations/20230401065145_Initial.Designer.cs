@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CliientApp.Migrations
 {
-    [DbContext(typeof(ChatRoomDB))]
+    [DbContext(typeof(ChatRoomDbContext))]
     [Migration("20230401065145_Initial")]
     partial class Initial
     {

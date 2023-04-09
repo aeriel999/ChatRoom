@@ -3,18 +3,22 @@ using System.Net;
 
 namespace CliientApp
 {
-    public class ChatRoomDB : DbContext
+    public class ChatRoomDbContext : DbContext
     {
+        private readonly string _connectionString;
+
         public DbSet<Client> Clients { get; set; }
+
+        public ChatRoomDbContext(string connectionString)
+        {
+            _connectionString = connectionString;
+        }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
 
-            optionsBuilder.UseSqlServer(@"Data Source=DEVBOX-PC;
-                                Initial Catalog = ChatRoom;
-                                Integrated Security=True;Connect Timeout=2;Encrypt=False;TrustServerCertificate=False;
-                                ApplicationIntent=ReadWrite;MultiSubnetFailover=False");
+            optionsBuilder.UseSqlServer(_connectionString);
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)

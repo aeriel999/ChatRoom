@@ -9,7 +9,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace CliientApp.Migrations
 {
-    [DbContext(typeof(ChatRoomDB))]
+    [DbContext(typeof(ChatRoomDbContext))]
     partial class ChatRoomDBModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
