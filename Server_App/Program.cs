@@ -18,12 +18,11 @@ using (ChatServer server = new ChatServer())
     server.Start();
 }
 
-
 public class ChatServer : IDisposable
 {
     private const string ADDRESS = "127.0.0.1";
     private const short PORT = 4040;
-    private UdpClient server = new UdpClient(PORT);
+    private UdpClient server = new UdpClient(int.Parse(ConfigurationManager.AppSettings["ServerPort"]!));
     private IPEndPoint clientEndPoint = null;
     private const int MAX_OF_MEMBERS = 3;
     private ChatRoomDbContext roomDB = new ChatRoomDbContext(ConfigurationManager.ConnectionStrings["ChatRoomDb"].ConnectionString);
@@ -161,7 +160,6 @@ public class ChatServer : IDisposable
 
     private IPEndPoint GetIp(string msg)
     {
-       // string login = new string(msg.Except(Commands.PRIVATE_CMD).ToArray());
         string login = msg.Substring(Commands.PRIVATE_CMD.Length);
 
         foreach (var m in Commands.Members)
@@ -175,7 +173,6 @@ public class ChatServer : IDisposable
 
     public void Dispose()
     {
-        Debug.WriteLine("Disposing");
         roomDB.Dispose();
     }
 }

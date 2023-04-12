@@ -116,9 +116,10 @@ namespace CliientApp
             try
             {
                 string message = msgTB.Text;
+
                 _privateMesseges.Add(new MessegeInfo($"You: {message}"));
 
-               var ns = client.GetStream();
+                var ns = client.GetStream();
 
                 using var sw = new StreamWriter(ns, leaveOpen:true);
 

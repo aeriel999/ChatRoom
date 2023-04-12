@@ -123,10 +123,7 @@ namespace CliientApp
                         model.AddMsg(new MessegeInfo(msg));
                 }
             }
-            catch (SocketException)
-            { 
-                MessageBox.Show("You are disconect!");
-            }
+            catch (SocketException) { }
             catch (Exception ex)
             {
                 MessageBox.Show(ex.Message);
@@ -233,7 +230,11 @@ namespace CliientApp
 
         private void EndBtn_Click(object sender, RoutedEventArgs e)
         {
-            _client.Close();
+            try
+            {
+                _client.Close();
+            }
+            catch (Exception) { }
             this.Close();
         }
     }
